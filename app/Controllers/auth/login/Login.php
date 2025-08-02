@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\login;
+namespace App\Controllers\auth\login;
 
 use App\Controllers\BaseController;
 

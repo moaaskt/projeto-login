@@ -11,7 +11,8 @@ $routes->setTranslateURIDashes(false);
 $routes->set404Override();
 $routes->setAutoRoute(false);
 
-$routes->get('/', 'login\Login::index');
+
+$routes->get('/', 'auth\login\Login::index');
 
 if (is_file(APPPATH . 'Config/Routes/Auth.php')) {
     require APPPATH . 'Config/Routes/Auth.php';

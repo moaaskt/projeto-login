@@ -41,7 +41,7 @@
 <body>
 
     <div class="sidebar">
-        <h3 class="mb-4">Dashboard</h3>
+        <h3 class="mb-4">Painel Admin</h3>
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a href="<?= base_url('dashboard') ?>" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
@@ -53,6 +53,9 @@
                 <a href="<?= base_url('dashboard/perfil') ?>" class="nav-link"><i class="fas fa-user-circle"></i> Perfil</a>
             </li>
         </ul>
+           <div style="position: absolute; bottom: 20px; width: calc(100% - 40px);">
+                 <a href="<?= base_url('logout') ?>" class="btn btn-danger w-100">Sair</a>
+            </div>
     </div>
 
     <div class="main-content">
@@ -62,7 +65,6 @@
                     <div class="card-body">
                         <h5 class="card-title">Bem-vindo de volta!</h5>
                         <p class="card-text">Seu e-mail é: <?= esc($email ?? 'Não encontrado') ?></p>
-                        <a href="<?= base_url('logout') ?>" class="btn btn-danger">Sair</a>
                     </div>
                 </div>
             </div>

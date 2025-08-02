@@ -1,4 +1,7 @@
 <?php
 
-$routes->post('login/auth', 'login\Login::auth');
-$routes->get('logout', 'login\Login::logout');
+
+$routes->post('login/auth', 'auth\login\Login::auth');
+
+
+$routes->get('logout', 'auth\login\Login::logout');
