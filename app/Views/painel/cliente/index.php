@@ -1,11 +1,11 @@
 <?= $this->extend('painel/templates/default') ?>
 
 <?= $this->section('title') ?>
-Minhas Faturas
+Clientes
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-    <h1 class="h3 mb-4">Minhas Faturas</h1>
+    <h1 class="h3 mb-4">Clientes</h1>
     <div class="card shadow">
         <div class="card-body">
             <div class="table-responsive">

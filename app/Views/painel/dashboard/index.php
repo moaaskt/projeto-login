@@ -1,110 +1,130 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #1e293b;
-            color: white;
-            font-family: 'Inter', sans-serif;
-        }
-        .sidebar {
-            background-color: #151c28;
-            color: white;
-            min-height: 100vh;
-            width: 250px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding: 20px;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-        }
-        .nav-link {
-            color: #8b949e !important;
-        }
-        .nav-link.active, .nav-link:hover {
-            color: #ffffff !important;
-        }
-        .card {
-            background-color: #2d3748;
-            border: none;
-        }
-    </style>
-</head>
-<body>
+<?= $this->extend('painel/templates/default') ?>
 
-    <div class="sidebar">
-        <h3 class="mb-4">Painel Admin</h3>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a href="<?= base_url('dashboard') ?>" class="nav-link active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a href="<?= base_url('dashboard/faturas') ?>" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> Faturas</a>
-            </li>
-            <li class="nav-item">
-                <a href="<?= base_url('dashboard/perfil') ?>" class="nav-link"><i class="fas fa-user-circle"></i> Perfil</a>
-            </li>
-        </ul>
-           <div style="position: absolute; bottom: 20px; width: calc(100% - 40px);">
-                 <a href="<?= base_url('logout') ?>" class="btn btn-danger w-100">Sair</a>
+<?= $this->section('title') ?>Dashboard<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Bem-vindo de volta!</h5>
+                    <p class="card-text">Seu e-mail é: <?= esc($email ?? 'Não encontrado') ?></p>
+                </div>
             </div>
+        </div>
     </div>
 
-    <div class="main-content">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Bem-vindo de volta!</h5>
-                        <p class="card-text">Seu e-mail é: <?= esc($email ?? 'Não encontrado') ?></p>
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2" style="border-left: 5px solid #6366f1;">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tickets Criados</div>
+                            <div class="h5 mb-0 font-weight-bold">120</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-calendar fa-2x text-secondary"></i></div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2" style="border-left: 5px solid #10b981;">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tickets Resolvidos</div>
+                            <div class="h5 mb-0 font-weight-bold">90</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-check-circle fa-2x text-secondary"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2" style="border-left: 5px solid #f59e0b;">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Tickets Pendentes</div>
+                            <div class="h5 mb-0 font-weight-bold">30</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-clock fa-2x text-secondary"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2" style="border-left: 5px solid #ef4444;">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Tickets Cancelados</div>
+                            <div class="h5 mb-0 font-weight-bold">5</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-times-circle fa-2x text-secondary"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Tickets Criados</h5>
-                        <h1 class="display-4">120</h1>
-                    </div>
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Visão Geral de Tickets</h6>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Tickets Resolvidos</h5>
-                        <h1 class="display-4">90</h1>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-dark">
-                    <div class="card-body">
-                        <h5 class="card-title">Tickets Pendentes</h5>
-                        <h1 class="display-4">30</h1>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-danger text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Tickets Cancelados</h5>
-                        <h1 class="display-4">5</h1>
+                <div class="card-body">
+                    <div class="chart-area" style="height: 320px;">
+                        <canvas id="ticketsChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Fontes de Tickets</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4" style="height: 320px;">
+                        <canvas id="ticketTypesChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+<?= $this->endSection() ?>
 
-</body>
-</html>
+<?= $this->section('scripts') ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Configuração para o gráfico de linha
+    new Chart(document.getElementById('ticketsChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: "Tickets Criados",
+                borderColor: "#6366f1",
+                data: [20, 30, 45, 40, 50, 70],
+            }],
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // Configuração para o gráfico de pizza
+    new Chart(document.getElementById('ticketTypesChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Vendas', 'Suporte', 'Bug'],
+            datasets: [{
+                data: [55, 30, 15],
+                backgroundColor: ['#6366f1', '#10b981', '#ef4444'],
+            }],
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
+<?= $this->endSection() ?>

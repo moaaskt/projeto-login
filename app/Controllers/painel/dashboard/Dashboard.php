@@ -22,4 +22,8 @@ class Dashboard extends BaseController
     {
         return view('painel/faturas/index');
     }
+    public function clientes()
+    {
+        return view('painel/clientes/index');
+    }
 }

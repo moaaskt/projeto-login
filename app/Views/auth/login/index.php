@@ -3,18 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login</title>
-    <!-- Bootstrap CSS -->
+    <title>Login | Doar Digital</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary-color: #6366f1;
-            --secondary-color: #10b981;
-            --dark-color: #1e293b;
-            --light-color: #f8fafc;
         }
-
         body {
+            font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             min-height: 100vh;
             display: flex;
@@ -22,137 +21,112 @@
             justify-content: center;
             padding: 20px;
         }
-
         .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: #ffffff;
             border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
             width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 420px;
         }
-
         .login-header {
             text-align: center;
             margin-bottom: 2rem;
         }
-
         .login-header img {
             width: 80px;
-            height: 80px;
-            object-fit: contain;
+            height: auto;
             margin-bottom: 1rem;
         }
-
         .login-header h1 {
-            color: var(--dark-color);
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.75rem;
             margin-bottom: 0.5rem;
         }
-
         .login-header p {
             color: #64748b;
             margin-bottom: 0;
         }
-
         .form-control {
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
+            height: 50px;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            transition: all 0.3s ease;
+            background-color: #f8fafc;
         }
-
         .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.2);
+            background-color: #fff;
         }
-
-        .form-label {
-            color: var(--dark-color);
-            font-weight: 500;
-            margin-bottom: 8px;
+        .input-group-text {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-right: 0;
+            border-radius: 8px 0 0 8px;
+            color: #94a3b8;
         }
-
+        .form-control-icon {
+            border-left: 0;
+            padding-left: 0;
+        }
         .btn-primary {
             background: var(--primary-color);
             border: none;
             padding: 12px;
             font-weight: 600;
             border-radius: 8px;
-            transition: all 0.3s ease;
         }
-
-        .btn-primary:hover {
-            background: #4f46e5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .alert {
-            border-radius: 8px;
-            border: none;
-        }
-
         .footer-text {
             text-align: center;
             color: #64748b;
             margin-top: 2rem;
             font-size: 0.9rem;
         }
-
-        .input-group-text {
-            background: #f1f5f9;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px 0 0 8px;
-        }
-
-        .form-floating > .form-control:focus,
-        .form-floating > .form-control:not(:placeholder-shown) {
-            ~ label {
-                opacity: 0.65;
-                transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-            }
-        }
     </style>
 </head>
 <body>
-
-<div class="login-container">
+<main class="login-container">
     <div class="login-header">
-        <img src="https://doardigital.com.br/wp-content/uploads/2022/11/Webp.net-resizeimage-1.png" alt="Logo">
-        <h1>Faça login</h1>
-        <p>Acesse sua conta</p>
+        <img src="https://doardigital.com.br/wp-content/uploads/2022/11/Webp.net-resizeimage-1.png" alt="Logo Doar Digital">
+        <h1>Faça seu login</h1>
+        <p>Acesse o painel de controle do seu projeto</p>
     </div>
 
     <form action="<?= base_url('login/auth') ?>" method="post">
+        
         <?php if (session()->getFlashdata('msg')) : ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?= session()->getFlashdata('msg') ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <div><?= session()->getFlashdata('msg') ?></div>
             </div>
         <?php endif; ?>
+        <?php if (session()->get('success')): ?>
+            <div class="alert alert-success"><?= session()->get('success') ?></div>
+        <?php endif; ?>
 
-        <div class="form-floating mb-3">
-            <input type="email" name="email" id="email" class="form-control" placeholder="Seu email" required>
-            <label for="email" class="form-label">Email</label>
+        <div class="input-group mb-3">
+            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+            <input type="email" name="email" id="email" class="form-control form-control-icon" placeholder="seu@email.com" required>
         </div>
 
-        <div class="form-floating mb-4">
-            <input type="password" name="password" id="password" class="form-control" placeholder="Senha" required>
-            <label for="password" class="form-label">Senha</label>
+        <div class="input-group mb-4">
+            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+            <input type="password" name="password" id="password" class="form-control form-control-icon" placeholder="Senha" required>
         </div>
 
-        <button class="w-100 btn btn-primary btn-lg" type="submit">Entrar</button>
+        <div class="d-grid">
+            <button class="btn btn-primary btn-lg" type="submit">Entrar</button>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="mb-0">Não tem uma conta? <a href="<?= base_url('cadastro') ?>" class="fw-bold" style="color: var(--primary-color); text-decoration: none;">Cadastre-se</a></p>
+        </div>
 
         <div class="footer-text">
-            <p>Doar Digital © 2025</p>
+            <p>Doar Digital &copy; 2025</p>
         </div>
     </form>
-</div>
-
+</main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
