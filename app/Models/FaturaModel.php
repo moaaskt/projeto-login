@@ -4,7 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class Fatura extends Model
+class FaturaModel extends Model
 {
     protected $table            = 'faturas';
     protected $primaryKey       = 'id';

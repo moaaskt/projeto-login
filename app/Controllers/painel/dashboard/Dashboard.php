@@ -3,11 +3,13 @@
 namespace App\Controllers\painel\dashboard;
 
 use App\Controllers\BaseController;
-use App\Models\ClienteModel; // <-- 1. IMPORTAMOS O MODEL DE CLIENTE
+use App\Models\ClienteModel;
+use App\Models\FaturaModel;
+
 
 class Dashboard extends BaseController
 {
-    // ... (métodos index, perfil, faturas continuam iguais) ...
+    
     public function index()
     {
         $session = session();
@@ -16,7 +18,7 @@ class Dashboard extends BaseController
         return view('painel/dashboard/index', $data);
     }
 
-    // --- MÉTODOS DE CLIENTES ---
+   
 
     /**
      * Lista todos os clientes
@@ -82,7 +84,7 @@ class Dashboard extends BaseController
             return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Ocorreu um erro ao excluir o cliente.');
         }
     }
-    
+
     // --- FIM DOS MÉTODOS DE CLIENTES ---
 
     public function perfil()
@@ -93,7 +95,77 @@ class Dashboard extends BaseController
 
     public function faturas()
     {
-        $data['title'] = 'Minhas Faturas';
+        $faturaModel = new FaturaModel();
+
+        // IMPORTANTE: Aqui fazemos um "JOIN" para buscar o nome do cliente
+        // junto com os dados da fatura.
+        $data = [
+            'faturas' => $faturaModel
+                ->select('faturas.*, clientes.nome_completo as nome_cliente')
+                ->join('clientes', 'clientes.id = faturas.cliente_id')
+                ->findAll(),
+            'title'   => 'Minhas Faturas'
+        ];
+
         return view('painel/faturas/index', $data);
+    }
+
+    /**
+     * Mostra o formulário para criar uma nova fatura.
+     * Precisamos buscar todos os clientes para listá-los no formulário.
+     */
+    public function novaFatura()
+    {
+        $clienteModel = new ClienteModel();
+        $data = [
+            'clientes' => $clienteModel->findAll(), // Busca todos os clientes
+            'title'    => 'Nova Fatura'
+        ];
+        return view('painel/faturas/form', $data);
+    }
+
+    /**
+     * Mostra o formulário para editar uma fatura existente.
+     */
+    public function editarFatura($id)
+    {
+        $faturaModel = new FaturaModel();
+        $clienteModel = new ClienteModel();
+
+        $data = [
+            'fatura'   => $faturaModel->find($id),    // Busca a fatura específica
+            'clientes' => $clienteModel->findAll(), // Busca todos os clientes para o dropdown
+            'title'    => 'Editar Fatura'
+        ];
+        return view('painel/faturas/form', $data);
+    }
+
+    /**
+     * Salva uma nova fatura ou atualiza uma existente.
+     */
+    public function salvarFatura()
+    {
+        $faturaModel = new FaturaModel();
+        $dados = $this->request->getPost();
+
+        if ($faturaModel->save($dados)) {
+            return redirect()->to(base_url('dashboard/faturas'))->with('success', 'Fatura salva com sucesso!');
+        } else {
+            // Se houver erros de validação, eles podem ser tratados aqui
+            return redirect()->back()->withInput()->with('error', 'Ocorreu um erro ao salvar a fatura.');
+        }
+    }
+
+    /**
+     * Exclui uma fatura.
+     */
+    public function excluirFatura($id)
+    {
+        $faturaModel = new FaturaModel();
+        if ($faturaModel->delete($id)) {
+            return redirect()->to(base_url('dashboard/faturas'))->with('success', 'Fatura excluída com sucesso!');
+        } else {
+            return redirect()->to(base_url('dashboard/faturas'))->with('error', 'Ocorreu um erro ao excluir a fatura.');
+        }
     }
 }
