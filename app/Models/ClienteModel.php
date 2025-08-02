@@ -4,7 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class Cliente extends Model
+class ClienteModel extends Model
 {
     protected $table            = 'clientes';
     protected $primaryKey       = 'id';
@@ -13,9 +13,8 @@ class Cliente extends Model
     protected $useSoftDeletes   = true; // Ativa a "lixeira"
     protected $protectFields    = true;
 
-    // Campos que podem ser preenchidos via formulário
-    protected $allowedFields    = [
-        'nome',
+  protected $allowedFields    = [
+        'nome_completo', // <-- O campo que estava faltando
         'cpf_cnpj',
         'email',
         'telefone',
