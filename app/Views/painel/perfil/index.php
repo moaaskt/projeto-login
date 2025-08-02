@@ -1,8 +1,6 @@
 <?= $this->extend('painel/templates/default') ?>
 
-<?= $this->section('title') ?>
-Meu Perfil
-<?= $this->endSection() ?>
+<?= $this->section('title') ?>Meu Perfil<?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
     <h1 class="h3 mb-4">Meu Perfil</h1>
@@ -17,7 +15,6 @@ Meu Perfil
                     <label for="email" class="form-label">Endereço de E-mail</label>
                     <input type="email" class="form-control" id="email" value="chefe@empresa.com" readonly>
                 </div>
-                <hr>
                 <button type="submit" class="btn btn-success">Salvar Alterações</button>
             </form>
         </div>
