@@ -9,7 +9,7 @@ use App\Models\FaturaModel;
 
 class Dashboard extends BaseController
 {
-    
+
     public function index()
     {
         $session = session();
@@ -18,7 +18,7 @@ class Dashboard extends BaseController
         return view('painel/dashboard/index', $data);
     }
 
-   
+
 
     /**
      * Lista todos os clientes
@@ -102,7 +102,7 @@ class Dashboard extends BaseController
         $data = [
             'faturas' => $faturaModel
                 ->select('faturas.*, clientes.nome_completo as nome_cliente')
-                ->join('clientes', 'clientes.id = faturas.cliente_id')
+                ->join('clientes', 'clientes.id = faturas.cliente_id', 'left')
                 ->findAll(),
             'title'   => 'Minhas Faturas'
         ];
@@ -161,6 +161,8 @@ class Dashboard extends BaseController
      */
     public function excluirFatura($id)
     {
+
+        dd($this->request->getPost());
         $faturaModel = new FaturaModel();
         if ($faturaModel->delete($id)) {
             return redirect()->to(base_url('dashboard/faturas'))->with('success', 'Fatura excluída com sucesso!');
