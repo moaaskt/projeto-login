@@ -1,16 +1,17 @@
-<?php $pager->setSurroundCount(2); ?>
+<?php $pager->setSurroundCount(2); // Define quantos links de número aparecem antes e depois da página atual ?>
 
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center">
+
         <?php if ($pager->hasPrevious()) : ?>
             <li class="page-item">
                 <a class="page-link" href="<?= $pager->getFirst() ?>" aria-label="Primeira">
-                    <span aria-hidden="true">&laquo;</span>
+                    <span>Primeira</span>
                 </a>
             </li>
             <li class="page-item">
                 <a class="page-link" href="<?= $pager->getPrevious() ?>" aria-label="Anterior">
-                    <span aria-hidden="true">&lsaquo;</span>
+                    <span>Anterior</span>
                 </a>
             </li>
         <?php endif ?>
@@ -26,14 +27,15 @@
         <?php if ($pager->hasNext()) : ?>
             <li class="page-item">
                 <a class="page-link" href="<?= $pager->getNext() ?>" aria-label="Próxima">
-                    <span aria-hidden="true">&rsaquo;</span>
+                    <span>Próxima</span>
                 </a>
             </li>
             <li class="page-item">
                 <a class="page-link" href="<?= $pager->getLast() ?>" aria-label="Última">
-                    <span aria-hidden="true">&raquo;</span>
+                    <span>Última</span>
                 </a>
             </li>
         <?php endif ?>
+
     </ul>
 </nav>
