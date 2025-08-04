@@ -1,36 +1,45 @@
-document.addEventListener('DOMContentLoaded', function () {
-  // Chart de Status de Faturas (Donut)
-  const statusEl = document.querySelector("#statusChart");
-  const statusSeries = JSON.parse(statusEl.dataset.series);
-  const statusChart = new ApexCharts(statusEl, {
-    chart: {
-      type: 'donut',
-      height: 350
-    },
-    theme: { mode: 'dark' },
-    labels: ['Paga', 'Vencida', 'Cancelada', 'Pendente'],
-    series: statusSeries,
-    legend: { position: 'bottom' }
-  });
-  statusChart.render();
+document.addEventListener("DOMContentLoaded", function () {
+    // Gráfico de Status das Faturas
+    const elStatus = document.querySelector('#graficoStatus');
+    if (elStatus) {
+        const statusSeries = JSON.parse(elStatus.dataset.series);
 
-  // Chart de Novos Clientes por Mês (Bar)
-  const clientesEl = document.querySelector("#clientesChart");
-  const clientesSeries = JSON.parse(clientesEl.dataset.series);
-  const clientesCategories = JSON.parse(clientesEl.dataset.categories);
-  const clientesChart = new ApexCharts(clientesEl, {
-    chart: {
-      type: 'bar',
-      height: 350
-    },
-    theme: { mode: 'dark' },
-    series: [{
-      name: 'Novos Clientes',
-      data: clientesSeries
-    }],
-    xaxis: {
-      categories: clientesCategories
+        new ApexCharts(elStatus, {
+            chart: {
+                type: 'donut',
+                background: '#1e293b'
+            },
+            series: statusSeries,
+            labels: ['Pagas', 'Vencidas', 'Canceladas', 'Pendentes'],
+            colors: ['#22c55e', '#f97316', '#ef4444', '#facc15'],
+            legend: { labels: { colors: '#f1f5f9' } }
+        }).render();
     }
-  });
-  clientesChart.render();
+
+    // Gráfico de Novos Clientes
+    const elClientes = document.querySelector('#graficoClientes');
+    if (elClientes) {
+        const clientesSeries = JSON.parse(elClientes.dataset.series);
+        const clientesLabels = JSON.parse(elClientes.dataset.categories);
+
+        new ApexCharts(elClientes, {
+            chart: {
+                type: 'bar',
+                background: '#1e293b'
+            },
+            series: [{
+                name: 'Clientes',
+                data: clientesSeries
+            }],
+            xaxis: {
+                categories: clientesLabels,
+                labels: { style: { colors: '#f1f5f9' } }
+            },
+            yaxis: {
+                labels: { style: { colors: '#f1f5f9' } }
+            },
+            colors: ['#38bdf8'],
+            legend: { labels: { colors: '#f1f5f9' } }
+        }).render();
+    }
 });
