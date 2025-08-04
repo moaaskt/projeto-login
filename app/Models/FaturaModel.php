@@ -66,4 +66,48 @@ class FaturaModel extends Model
         // Retorna os resultados paginados
         return $builder->paginate(15);
     }
+
+      /**
+     * Calcula e retorna as estatísticas das faturas para o dashboard.
+     * Retorna contagem e soma total, e também agrupado por status.
+     *
+     * @return array
+     */
+    public function getDashboardStatistics()
+    {
+        // 1. Busca os totais gerais
+        $totals = $this->select('COUNT(id) as total_count, SUM(valor) as total_sum')
+                       ->first();
+
+        // 2. Busca os totais agrupados por status
+        $byStatus = $this->select('status, COUNT(id) as count, SUM(valor) as sum')
+                         ->groupBy('status')
+                         ->findAll();
+
+        // 3. Monta um array final e organizado
+        $statistics = [
+            'total' => [
+                'count' => $totals['total_count'] ?? 0,
+                'sum'   => $totals['total_sum'] ?? 0,
+            ],
+            'Paga'      => ['count' => 0, 'sum' => 0],
+            'Pendente'  => ['count' => 0, 'sum' => 0],
+            'Vencida'   => ['count' => 0, 'sum' => 0],
+            'Cancelada' => ['count' => 0, 'sum' => 0],
+        ];
+
+        foreach ($byStatus as $row) {
+            if (isset($statistics[$row['status']])) {
+                $statistics[$row['status']] = [
+                    'count' => $row['count'],
+                    'sum'   => $row['sum'],
+                ];
+            }
+        }
+        
+        return $statistics;
+    }
+
+
+
 }

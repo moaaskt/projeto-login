@@ -49,6 +49,7 @@ class Dashboard extends BaseController
             // Passa os filtros para o novo método de busca do Model
             'faturas' => $faturaModel->search($filters),
             'pager'   => $faturaModel->pager, // A paginação continua funcionando
+            'stats'   => $faturaModel->getDashboardStatistics(), // Pega as estatísticas
             'title'   => 'Minhas Faturas',
             'filters' => $filters // Devolve os filtros para a View para preencher o formulário
         ];
@@ -112,7 +113,7 @@ class Dashboard extends BaseController
     public function visualizarFatura($id)
     {
         $faturaModel = new FaturaModel();
-        
+
         // Buscamos a fatura já com o nome do cliente usando o JOIN
         $fatura = $faturaModel
             ->select('faturas.*, clientes.nome_completo as nome_cliente')
@@ -133,9 +134,9 @@ class Dashboard extends BaseController
     }
 
 
-    
 
- /**
+
+    /**
      * Gera uma planilha Excel com os detalhes da fatura.
      */
     public function gerarExcel($id)
