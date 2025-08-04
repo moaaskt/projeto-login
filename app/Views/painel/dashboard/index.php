@@ -54,15 +54,6 @@
 </div>
 
 
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div id="graficoStatus" style="background-color:#1e293b; padding:20px; border-radius:8px;" data-series='<?= json_encode([$stats['Paga']['count'], $stats['Vencida']['count'], $stats['Cancelada']['count'], $stats['Pendente']['count']]) ?>'></div>
-    </div>
-    <div class="col-md-6">
-        <div id="graficoClientes" style="background-color:#1e293b; padding:20px; border-radius:8px;" data-series='<?= $clientSeries ?>'
-            data-categories='<?= $clientLabels ?>'></div>
-    </div>
-</div>
 
 
 
