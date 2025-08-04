@@ -4,22 +4,20 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     // Rota principal do painel
     $routes->get('', 'painel\dashboard\Dashboard::index');
 
-    // Rotas de Clientes (CRUD)
-    $routes->get('clientes', 'painel\dashboard\Dashboard::clientes'); // Listar
-    $routes->get('clientes/novo', 'painel\dashboard\Dashboard::novoCliente'); // Formulário de novo
-    $routes->get('clientes/editar/(:num)', 'painel\dashboard\Dashboard::editarCliente/$1'); // Formulário de edição
-    $routes->post('clientes/salvar', 'painel\dashboard\Dashboard::salvarCliente'); // Ação de salvar (novo ou edição)
-    $routes->get('clientes/excluir/(:num)', 'painel\dashboard\Dashboard::excluirCliente/$1'); // Ação de excluir
+    // --- ROTAS DE CLIENTES (APONTAM PARA O CONTROLLER DEDICADO) ---
+    $routes->get('clientes', 'painel\ClientesController::index');
+    $routes->get('clientes/novo', 'painel\ClientesController::novo');
+    $routes->get('clientes/editar/(:num)', 'painel\ClientesController::editar/$1');
+    $routes->post('clientes/salvar', 'painel\ClientesController::salvar');
+    $routes->get('clientes/excluir/(:num)', 'painel\ClientesController::excluir/$1');
 
-     // Rotas de Faturas (CRUD ) 
-    $routes->get('faturas', 'painel\dashboard\Dashboard::faturas'); // Listar
-    $routes->get('faturas/nova', 'painel\dashboard\Dashboard::novaFatura'); // Formulário de nova
-    $routes->get('faturas/editar/(:num)', 'painel\dashboard\Dashboard::editarFatura/$1'); // Formulário de edição
-    $routes->post('faturas/salvar', 'painel\dashboard\Dashboard::salvarFatura'); // Ação de salvar
-    $routes->get('faturas/excluir/(:num)', 'painel\dashboard\Dashboard::excluirFatura/$1'); // Ação de excluir
-
-
-    // Rotas de Perfil e Faturas 
-    $routes->get('perfil', 'painel\dashboard\Dashboard::perfil');
+    // --- ROTAS DE FATURAS (APONTAM PARA O CONTROLLER PRINCIPAL) ---
     $routes->get('faturas', 'painel\dashboard\Dashboard::faturas');
+    $routes->get('faturas/nova', 'painel\dashboard\Dashboard::novaFatura');
+    $routes->get('faturas/editar/(:num)', 'painel\dashboard\Dashboard::editarFatura/$1');
+    $routes->post('faturas/salvar', 'painel\dashboard\Dashboard::salvarFatura');
+    $routes->get('faturas/excluir/(:num)', 'painel\dashboard\Dashboard::excluirFatura/$1');
+
+    // Rota de Perfil
+    $routes->get('perfil', 'painel\dashboard\Dashboard::perfil');
 });

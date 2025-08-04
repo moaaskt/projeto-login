@@ -8,6 +8,7 @@
 
 <div class="card">
     <div class="card-body">
+        
         <form action="<?= base_url('dashboard/faturas/salvar') ?>" method="post">
             
             <input type="hidden" name="id" value="<?= isset($fatura) ? esc($fatura['id']) : '' ?>">
@@ -37,13 +38,13 @@
                     <input type="text" class="form-control" id="valor" name="valor" value="<?= isset($fatura) ? esc($fatura['valor']) : '' ?>" required>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="vencimento" class="form-label">Data de Vencimento</label>
-                    <input type="date" class="form-control" id="vencimento" name="vencimento" value="<?= isset($fatura) ? esc($fatura['vencimento']) : '' ?>" required>
+                    <label for="data_vencimento" class="form-label">Data de Vencimento</label>
+                    <input type="date" class="form-control" id="data_vencimento" name="data_vencimento" value="<?= isset($fatura) ? esc($fatura['data_vencimento']) : '' ?>" required>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="status" class="form-label">Status</label>
                     <select class="form-select" id="status" name="status" required>
-                        <?php $status = $fatura['status'] ?? 'Pendente'; ?>
+                        <?php $status = isset($fatura) ? $fatura['status'] : 'Pendente'; ?>
                         <option value="Pendente" <?= $status == 'Pendente' ? 'selected' : '' ?>>Pendente</option>
                         <option value="Paga" <?= $status == 'Paga' ? 'selected' : '' ?>>Paga</option>
                         <option value="Vencida" <?= $status == 'Vencida' ? 'selected' : '' ?>>Vencida</option>
@@ -56,7 +57,9 @@
                 <button type="submit" class="btn btn-success">Salvar Fatura</button>
                 <a href="<?= base_url('dashboard/faturas') ?>" class="btn btn-secondary">Cancelar</a>
             </div>
+
         </form>
+
     </div>
 </div>
 

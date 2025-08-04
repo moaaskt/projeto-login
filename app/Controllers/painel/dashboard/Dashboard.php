@@ -3,102 +3,31 @@
 namespace App\Controllers\painel\dashboard;
 
 use App\Controllers\BaseController;
-use App\Models\ClienteModel;
+use App\Models\ClienteModel; // Pode remover esta linha se quiser, pois não é mais usada aqui
 use App\Models\FaturaModel;
-
 
 class Dashboard extends BaseController
 {
+    protected $session;
+    protected $usuarioData;
+
+    public function __construct()
+    {
+        $this->session = session();
+        $this->usuarioData = $this->session->get('usuario');
+    }
 
     public function index()
     {
-        $session = session();
-        $data['email'] = $session->get('usuario')['email'];
+        $data['email'] = $this->usuarioData['email'] ?? 'E-mail não encontrado';
         $data['title'] = 'Dashboard Principal';
         return view('painel/dashboard/index', $data);
     }
-
-
-
-    /**
-     * Lista todos os clientes
-     */
-    public function clientes()
-    {
-        $clienteModel = new ClienteModel();
-        $data = [
-            'clientes' => $clienteModel->findAll(), // Busca todos os clientes
-            'title'    => 'Meus Clientes'
-        ];
-        return view('painel/clientes/index', $data);
-    }
-
-    /**
-     * Mostra o formulário para criar um novo cliente
-     */
-    public function novoCliente()
-    {
-        $data = [
-            'title' => 'Novo Cliente'
-        ];
-        return view('painel/clientes/form', $data);
-    }
-
-    /**
-     * Mostra o formulário para editar um cliente existente
-     */
-    public function editarCliente($id)
-    {
-        $clienteModel = new ClienteModel();
-        $data = [
-            'cliente' => $clienteModel->find($id), // Busca o cliente específico pelo ID
-            'title'   => 'Editar Cliente'
-        ];
-        return view('painel/clientes/form', $data);
-    }
-
-    /**
-     * Salva um novo cliente ou atualiza um existente
-     */
-    public function salvarCliente()
-    {
-        $clienteModel = new ClienteModel();
-        $dados = $this->request->getPost();
-
-        if ($clienteModel->save($dados)) {
-            return redirect()->to(base_url('dashboard/clientes'))->with('success', 'Cliente salvo com sucesso!');
-        } else {
-            return redirect()->back()->withInput()->with('errors', $clienteModel->errors());
-        }
-    }
-
-    /**
-     * Exclui um cliente (soft delete)
-     */
-    public function excluirCliente($id)
-    {
-        $clienteModel = new ClienteModel();
-        if ($clienteModel->delete($id)) {
-            return redirect()->to(base_url('dashboard/clientes'))->with('success', 'Cliente excluído com sucesso!');
-        } else {
-            return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Ocorreu um erro ao excluir o cliente.');
-        }
-    }
-
-    // --- FIM DOS MÉTODOS DE CLIENTES ---
-
-    public function perfil()
-    {
-        $data['title'] = 'Meu Perfil';
-        return view('painel/perfil/index', $data);
-    }
-
+    
+    // --- MÉTODOS DE FATURAS ---
     public function faturas()
     {
         $faturaModel = new FaturaModel();
-
-        // IMPORTANTE: Aqui fazemos um "JOIN" para buscar o nome do cliente
-        // junto com os dados da fatura.
         $data = [
             'faturas' => $faturaModel
                 ->select('faturas.*, clientes.nome_completo as nome_cliente')
@@ -106,68 +35,66 @@ class Dashboard extends BaseController
                 ->findAll(),
             'title'   => 'Minhas Faturas'
         ];
-
         return view('painel/faturas/index', $data);
     }
 
-    /**
-     * Mostra o formulário para criar uma nova fatura.
-     * Precisamos buscar todos os clientes para listá-los no formulário.
-     */
     public function novaFatura()
     {
         $clienteModel = new ClienteModel();
         $data = [
-            'clientes' => $clienteModel->findAll(), // Busca todos os clientes
+            'clientes' => $clienteModel->findAll(),
             'title'    => 'Nova Fatura'
         ];
         return view('painel/faturas/form', $data);
     }
 
-    /**
-     * Mostra o formulário para editar uma fatura existente.
-     */
     public function editarFatura($id)
     {
         $faturaModel = new FaturaModel();
         $clienteModel = new ClienteModel();
-
         $data = [
-            'fatura'   => $faturaModel->find($id),    // Busca a fatura específica
-            'clientes' => $clienteModel->findAll(), // Busca todos os clientes para o dropdown
+            'fatura'   => $faturaModel->find($id),
+            'clientes' => $clienteModel->findAll(),
             'title'    => 'Editar Fatura'
         ];
         return view('painel/faturas/form', $data);
     }
 
-    /**
-     * Salva uma nova fatura ou atualiza uma existente.
-     */
     public function salvarFatura()
     {
         $faturaModel = new FaturaModel();
-        $dados = $this->request->getPost();
-
+        $dados = [
+            'id'              => $this->request->getPost('id'),
+            'cliente_id'      => $this->request->getPost('cliente_id'),
+            'descricao'       => $this->request->getPost('descricao'),
+            'valor'           => $this->request->getPost('valor'),
+            'data_vencimento' => $this->request->getPost('data_vencimento'),
+            'status'          => $this->request->getPost('status'),
+        ];
+        if (empty($dados['id'])) {
+            unset($dados['id']);
+        }
         if ($faturaModel->save($dados)) {
             return redirect()->to(base_url('dashboard/faturas'))->with('success', 'Fatura salva com sucesso!');
         } else {
-            // Se houver erros de validação, eles podem ser tratados aqui
-            return redirect()->back()->withInput()->with('error', 'Ocorreu um erro ao salvar a fatura.');
+            return redirect()->back()->withInput()->with('errors', $faturaModel->errors());
         }
     }
 
-    /**
-     * Exclui uma fatura.
-     */
     public function excluirFatura($id)
     {
-
-        dd($this->request->getPost());
         $faturaModel = new FaturaModel();
         if ($faturaModel->delete($id)) {
             return redirect()->to(base_url('dashboard/faturas'))->with('success', 'Fatura excluída com sucesso!');
         } else {
             return redirect()->to(base_url('dashboard/faturas'))->with('error', 'Ocorreu um erro ao excluir a fatura.');
         }
+    }
+
+    // --- MÉTODO DE PERFIL ---
+    public function perfil()
+    {
+        $data['title'] = 'Meu Perfil';
+        return view('painel/perfil/index', $data);
     }
 }

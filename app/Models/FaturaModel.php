@@ -13,18 +13,16 @@ class FaturaModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
 
+    // AQUI ESTÁ A CORREÇÃO PRINCIPAL
     protected $allowedFields = [
-        'client_id',
+        'cliente_id',       // Nome padronizado
         'descricao',
         'valor',
-        'vencimento',
+        'data_vencimento',  // Nome padronizado
         'data_pagamento',
         'status',
         'fatura_id',
         'comprovantes',
-        'created_at',
-        'updated_at',
-        'deleted_at',
     ];
 
     // Timestamps
@@ -33,20 +31,4 @@ class FaturaModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
-
-    // Validation (opcional)
-    protected $validationRules    = [];
-    protected $validationMessages = [];
-    protected $skipValidation     = false;
-
-    // Callbacks (opcional)
-    protected $allowCallbacks = true;
-    protected $beforeInsert   = [];
-    protected $afterInsert    = [];
-    protected $beforeUpdate   = [];
-    protected $afterUpdate    = [];
-    protected $beforeFind     = [];
-    protected $afterFind      = [];
-    protected $beforeDelete   = [];
-    protected $afterDelete    = [];
 }

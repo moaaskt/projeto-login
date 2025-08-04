@@ -34,11 +34,12 @@
                                 <td><?= esc($fatura['id']) ?></td>
                                 <td><?= esc($fatura['nome_cliente']) ?></td>
                                 <td>R$ <?= number_format(esc($fatura['valor']), 2, ',', '.') ?></td>
-                                <td><?= date('d/m/Y', strtotime(esc($fatura['vencimento']))) ?></td>
+                                
+                                <td><?= date('d/m/Y', strtotime(esc($fatura['data_vencimento']))) ?></td>
+                                
                                 <td>
                                     <?php 
                                         $statusClass = ['Paga' => 'success', 'Pendente' => 'warning', 'Vencida' => 'danger', 'Cancelada' => 'secondary'];
-                                        $statusColor = $fatura['status'] == 'Pendente' ? 'dark' : 'white';
                                     ?>
                                     <span class="badge text-bg-<?= $statusClass[$fatura['status']] ?? 'light' ?>"><?= esc($fatura['status']) ?></span>
                                 </td>
