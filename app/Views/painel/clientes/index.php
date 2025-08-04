@@ -42,6 +42,7 @@
                                 <td><?= esc($cliente['email']) ?></td>
                                 <td><?= esc($cliente['telefone']) ?></td>
                                 <td class="text-center">
+                                    <a href="<?= base_url('dashboard/clientes/visualizar/' . $cliente['id']) ?>" class="btn btn-success btn-sm" title="Visualizar"><i class="fas fa-eye"></i></a>
                                     <a href="<?= base_url('dashboard/clientes/editar/' . $cliente['id']) ?>" class="btn btn-info btn-sm" title="Editar"><i class="fas fa-pencil-alt"></i></a>
                                     <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal-<?= $cliente['id'] ?>" title="Excluir"><i class="fas fa-trash"></i></a>
                                 </td>
@@ -60,27 +61,27 @@
 
 <!-- OFFCANVAS PARA OS FILTROS -->
 <div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasFiltersLabel"><i class="fas fa-filter me-2"></i>Filtros de Pesquisa</h5>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <!-- Formulário de Filtros -->
-    <form action="<?= base_url('dashboard/clientes') ?>" method="get">
-        <div class="mb-3">
-            <label for="termo" class="form-label">Nome, Email, CPF ou Telefone</label>
-            <input type="text" class="form-control" name="termo" id="termo" placeholder="Digite para buscar..." value="<?= esc($filters['termo'] ?? '') ?>">
-        </div>
-        <div class="mb-3">
-            <label for="data_cadastro" class="form-label">Data de Cadastro</label>
-            <input type="date" class="form-control" name="data_cadastro" id="data_cadastro" value="<?= esc($filters['data_cadastro'] ?? '') ?>">
-        </div>
-        <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-success">Aplicar Filtros</button>
-            <a href="<?= base_url('dashboard/clientes') ?>" class="btn btn-light">Limpar Filtros</a>
-        </div>
-    </form>
-  </div>
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel"><i class="fas fa-filter me-2"></i>Filtros de Pesquisa</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <!-- Formulário de Filtros -->
+        <form action="<?= base_url('dashboard/clientes') ?>" method="get">
+            <div class="mb-3">
+                <label for="termo" class="form-label">Nome, Email, CPF ou Telefone</label>
+                <input type="text" class="form-control" name="termo" id="termo" placeholder="Digite para buscar..." value="<?= esc($filters['termo'] ?? '') ?>">
+            </div>
+            <div class="mb-3">
+                <label for="data_cadastro" class="form-label">Data de Cadastro</label>
+                <input type="date" class="form-control" name="data_cadastro" id="data_cadastro" value="<?= esc($filters['data_cadastro'] ?? '') ?>">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-success">Aplicar Filtros</button>
+                <a href="<?= base_url('dashboard/clientes') ?>" class="btn btn-light">Limpar Filtros</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Modais de Confirmação de Exclusão -->

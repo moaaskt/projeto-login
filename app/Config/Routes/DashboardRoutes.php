@@ -10,6 +10,9 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     $routes->get('clientes/editar/(:num)', 'painel\ClientesController::editar/$1');
     $routes->post('clientes/salvar', 'painel\ClientesController::salvar');
     $routes->get('clientes/excluir/(:num)', 'painel\ClientesController::excluir/$1');
+    $routes->get('clientes/visualizar/(:num)', 'painel\ClientesController::visualizar/$1'); // <-- ROTA NOVA
+    $routes->get('clientes/pdf/(:num)', 'painel\ClientesController::gerarPdf/$1');
+
 
     // --- ROTAS DE FATURAS (APONTAM PARA O CONTROLLER PRINCIPAL) ---
     $routes->get('faturas', 'painel\dashboard\Dashboard::faturas');
