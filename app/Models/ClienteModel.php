@@ -67,6 +67,16 @@ class ClienteModel extends Model
         }
 
         // Retorna todos os resultados que correspondem aos filtros
-         return $builder->paginate(15);
+        return $builder->paginate(15);
+    }
+    /**
+     * Retorna a contagem de novos clientes por mês para um gráfico.
+     */
+    public function getNewClientsPerMonth()
+    {
+        return $this->select("COUNT(id) as count, DATE_FORMAT(created_at, '%Y-%m') as mes")
+            ->groupBy("DATE_FORMAT(created_at, '%Y-%m')")
+            ->orderBy("mes", "ASC")
+            ->findAll();
     }
 }

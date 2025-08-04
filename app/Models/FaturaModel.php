@@ -73,39 +73,71 @@ class FaturaModel extends Model
      *
      * @return array
      */
-    public function getDashboardStatistics()
-    {
-        // 1. Busca os totais gerais
-        $totals = $this->select('COUNT(id) as total_count, SUM(valor) as total_sum')
-                       ->first();
+   public function getDashboardStatistics()
+{
+    // 1. Clona o model para evitar conflitos com outros usos
+    $modelClone = clone $this;
 
-        // 2. Busca os totais agrupados por status
-        $byStatus = $this->select('status, COUNT(id) as count, SUM(valor) as sum')
-                         ->groupBy('status')
-                         ->findAll();
+    // 2. Totais gerais
+    $totals = $modelClone
+        ->select('COUNT(id) as total_count, SUM(valor) as total_sum')
+        ->first();
 
-        // 3. Monta um array final e organizado
-        $statistics = [
-            'total' => [
-                'count' => $totals['total_count'] ?? 0,
-                'sum'   => $totals['total_sum'] ?? 0,
-            ],
-            'Paga'      => ['count' => 0, 'sum' => 0],
-            'Pendente'  => ['count' => 0, 'sum' => 0],
-            'Vencida'   => ['count' => 0, 'sum' => 0],
-            'Cancelada' => ['count' => 0, 'sum' => 0],
-        ];
+    // 3. Totais por status
+    $byStatus = $this->select('status, COUNT(id) as count, SUM(valor) as sum')
+                     ->groupBy('status')
+                     ->findAll();
 
-        foreach ($byStatus as $row) {
-            if (isset($statistics[$row['status']])) {
-                $statistics[$row['status']] = [
-                    'count' => $row['count'],
-                    'sum'   => $row['sum'],
-                ];
-            }
+    // 4. Inicializa estrutura padronizada
+    $statuses = ['Paga', 'Pendente', 'Vencida', 'Cancelada'];
+    $statistics = [
+        'total' => [
+            'count' => (int)($totals['total_count'] ?? 0),
+            'sum'   => (float)($totals['total_sum'] ?? 0),
+        ],
+    ];
+
+    foreach ($statuses as $status) {
+        $statistics[$status] = ['count' => 0, 'sum' => 0];
+    }
+
+    // 5. Preenche os valores de acordo com o que veio do banco
+    foreach ($byStatus as $row) {
+        $status = ucfirst(strtolower($row['status'])); // normaliza: 'paga' -> 'Paga'
+
+        if (array_key_exists($status, $statistics)) {
+            $statistics[$status] = [
+                'count' => (int)$row['count'],
+                'sum'   => (float)$row['sum'],
+            ];
         }
-        
-        return $statistics;
+    }
+
+    return $statistics;
+}
+
+
+    /**
+     * Retorna o faturamento (soma de faturas pagas) por mês para um gráfico.
+     */
+    public function getMonthlyRevenue()
+    {
+        return $this->select("SUM(valor) as total, DATE_FORMAT(data_pagamento, '%Y-%m') as mes")
+                    ->where('status', 'Paga')
+                    ->where('data_pagamento IS NOT NULL')
+                    ->groupBy("DATE_FORMAT(data_pagamento, '%Y-%m')")
+                    ->orderBy("mes", "ASC")
+                    ->findAll();
+    }
+
+    /**
+     * Retorna a contagem de faturas para cada status.
+     */
+    public function getStatusDistribution()
+    {
+        return $this->select('status, COUNT(id) as count')
+                    ->groupBy('status')
+                    ->findAll();
     }
 
 
