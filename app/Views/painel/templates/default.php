@@ -22,7 +22,7 @@
 <body>
     <div class="d-flex">
         <div class="sidebar">
-            <h3 class="mb-4">Dashboard</h3>
+            <h3 class="mb-4">Dashboard CRM</h3>
             <ul class="nav flex-column">
                 <li class="nav-item">
                     <a href="<?= base_url('dashboard') ?>" class="nav-link"><i class="fas fa-tachometer-alt fa-fw me-2"></i>Dashboard</a>

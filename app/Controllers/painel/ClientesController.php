@@ -13,10 +13,20 @@ class ClientesController extends BaseController
     public function index()
     {
         $clienteModel = new ClienteModel();
-        $data = [
-            'clientes' => $clienteModel->findAll(),
-            'title'    => 'Meus Clientes'
+
+        // Pega os filtros da URL (via GET)
+        $filters = [
+            'termo'         => $this->request->getGet('termo'),
+            'data_cadastro' => $this->request->getGet('data_cadastro')
         ];
+
+        $data = [
+            // Passa os filtros para o Model fazer a busca
+            'clientes' => $clienteModel->search($filters),
+            'title'    => 'Meus Clientes',
+            'filters'  => $filters // Devolve os filtros para a View
+        ];
+
         return view('painel/clientes/index', $data);
     }
 
