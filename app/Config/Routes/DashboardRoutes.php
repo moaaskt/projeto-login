@@ -20,6 +20,8 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     $routes->get('faturas/editar/(:num)', 'painel\dashboard\Dashboard::editarFatura/$1');
     $routes->post('faturas/salvar', 'painel\dashboard\Dashboard::salvarFatura');
     $routes->get('faturas/excluir/(:num)', 'painel\dashboard\Dashboard::excluirFatura/$1');
+    $routes->get('faturas/visualizar/(:num)', 'painel\dashboard\Dashboard::visualizarFatura/$1'); // <-- ROTA NOVA
+    $routes->get('faturas/excel/(:num)', 'painel\dashboard\Dashboard::gerarExcel/$1');
 
     // Rota de Perfil
     $routes->get('perfil', 'painel\dashboard\Dashboard::perfil');

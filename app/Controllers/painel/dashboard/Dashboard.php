@@ -3,8 +3,15 @@
 namespace App\Controllers\painel\dashboard;
 
 use App\Controllers\BaseController;
-use App\Models\ClienteModel; // Pode remover esta linha se quiser, pois não é mais usada aqui
+use App\Models\ClienteModel;
 use App\Models\FaturaModel;
+use CodeIgniter\Exceptions\PageNotFoundException;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
+
 
 class Dashboard extends BaseController
 {
@@ -101,6 +108,89 @@ class Dashboard extends BaseController
             return redirect()->to(base_url('dashboard/faturas'))->with('error', 'Ocorreu um erro ao excluir a fatura.');
         }
     }
+
+    public function visualizarFatura($id)
+    {
+        $faturaModel = new FaturaModel();
+        
+        // Buscamos a fatura já com o nome do cliente usando o JOIN
+        $fatura = $faturaModel
+            ->select('faturas.*, clientes.nome_completo as nome_cliente')
+            ->join('clientes', 'clientes.id = faturas.cliente_id', 'left')
+            ->find($id);
+
+        // Se a fatura não for encontrada, mostra um erro 404
+        if ($fatura === null) {
+            throw new PageNotFoundException('Não foi possível encontrar a fatura com ID: ' . $id);
+        }
+
+        $data = [
+            'fatura' => $fatura,
+            'title'  => 'Detalhes da Fatura'
+        ];
+
+        return view('painel/faturas/visualizar', $data);
+    }
+
+
+    
+
+ /**
+     * Gera uma planilha Excel com os detalhes da fatura.
+     */
+    public function gerarExcel($id)
+    {
+        $faturaModel = new FaturaModel();
+        $fatura = $faturaModel
+            ->select('faturas.*, clientes.nome_completo as nome_cliente')
+            ->join('clientes', 'clientes.id = faturas.cliente_id', 'left')
+            ->find($id);
+
+        if ($fatura === null) {
+            throw new PageNotFoundException('Não foi possível encontrar a fatura com ID: ' . $id);
+        }
+
+        // 1. Cria um novo objeto de planilha
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Detalhes da Fatura');
+
+        // 2. Define os cabeçalhos e os dados
+        $sheet->setCellValue('A1', 'CAMPO');
+        $sheet->setCellValue('B1', 'VALOR');
+
+        $sheet->setCellValue('A2', 'ID da Fatura');
+        $sheet->setCellValue('B2', $fatura['id']);
+        $sheet->setCellValue('A3', 'Cliente');
+        $sheet->setCellValue('B3', $fatura['nome_cliente']);
+        $sheet->setCellValue('A4', 'Descrição');
+        $sheet->setCellValue('B4', $fatura['descricao']);
+        $sheet->setCellValue('A5', 'Valor');
+        $sheet->setCellValue('B5', $fatura['valor']);
+        $sheet->setCellValue('A6', 'Data de Vencimento');
+        $sheet->setCellValue('B6', date('d/m/Y', strtotime($fatura['data_vencimento'])));
+        $sheet->setCellValue('A7', 'Status');
+        $sheet->setCellValue('B7', $fatura['status']);
+
+        // 3. Estiliza o cabeçalho (negrito)
+        $sheet->getStyle('A1:B1')->getFont()->setBold(true);
+
+        // 4. Cria o "escritor" para o formato Xlsx (Excel)
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'fatura_' . $fatura['id'] . '.xlsx';
+
+        // 5. Define os cabeçalhos HTTP para forçar o download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        // 6. Envia o arquivo para o navegador
+        $writer->save('php://output');
+        exit();
+    }
+
+
+
 
     // --- MÉTODO DE PERFIL ---
     public function perfil()
