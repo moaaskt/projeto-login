@@ -67,6 +67,6 @@ class ClienteModel extends Model
         }
 
         // Retorna todos os resultados que correspondem aos filtros
-        return $builder->findAll();
+         return $builder->paginate(15);
     }
 }

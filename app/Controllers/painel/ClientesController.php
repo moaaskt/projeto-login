@@ -26,6 +26,7 @@ class ClientesController extends BaseController
         $data = [
             // Passa os filtros para o Model fazer a busca
             'clientes' => $clienteModel->search($filters),
+            'pager'    => $clienteModel->pager,
             'title'    => 'Meus Clientes',
             'filters'  => $filters // Devolve os filtros para a View
         ];
@@ -108,7 +109,7 @@ class ClientesController extends BaseController
     /**
      * Gera e exibe um PDF com os detalhes do cliente.
      */
-     public function gerarPdf($id)
+    public function gerarPdf($id)
     {
         $clienteModel = new ClienteModel();
         $cliente = $clienteModel->find($id);
@@ -116,7 +117,7 @@ class ClientesController extends BaseController
         if ($cliente === null) {
             throw new PageNotFoundException('Não foi possível encontrar o cliente com ID: ' . $id);
         }
-        
+
         // Preparando o HTML que será convertido em PDF
         $dataCadastro = date('d/m/Y H:i', strtotime($cliente['created_at']));
         $html = "
@@ -152,7 +153,7 @@ class ClientesController extends BaseController
         // Configurações do Dompdf
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true); 
+        $options->set('isRemoteEnabled', true);
 
         // Instancia o Dompdf
         $dompdf = new Dompdf($options);
