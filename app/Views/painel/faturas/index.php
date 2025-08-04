@@ -16,10 +16,12 @@
         justify-content: space-between;
         align-items: center;
     }
+
     .kpi-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     }
+
     .kpi-text .kpi-title {
         font-size: 0.9rem;
         font-weight: 600;
@@ -27,26 +29,43 @@
         margin-bottom: 5px;
         opacity: 0.8;
     }
+
     .kpi-text .kpi-count {
         font-size: 2.2rem;
         font-weight: 700;
         line-height: 1;
     }
+
     .kpi-text .kpi-sum {
         font-size: 1rem;
         opacity: 0.9;
     }
+
     .kpi-chart {
         width: 120px;
         height: 60px;
     }
 
     /* Gradientes */
-    .kpi-card.total     { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
-    .kpi-card.pendente  { background: linear-gradient(135deg, #198754, #146c43); }
-    .kpi-card.paga      { background: linear-gradient(135deg, #ffc107, #d39e00); }
-    .kpi-card.vencida   { background: linear-gradient(135deg, #dc3545, #b02a37); }
-    .kpi-card.cancelada { background: linear-gradient(135deg, #6c757d, #545b62); }
+    .kpi-card.total {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    }
+
+    .kpi-card.pendente {
+        background: linear-gradient(135deg, #198754, #146c43);
+    }
+
+    .kpi-card.paga {
+        background: linear-gradient(135deg, #ffc107, #d39e00);
+    }
+
+    .kpi-card.vencida {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+    }
+
+    .kpi-card.cancelada {
+        background: linear-gradient(135deg, #6c757d, #545b62);
+    }
 </style>
 
 
@@ -68,7 +87,7 @@
     </div>
     <div class="col-lg col-md-6">
         <div class="kpi-card pendente">
-             <div class="kpi-text">
+            <div class="kpi-text">
                 <div class="kpi-title">Faturas Pendentes</div>
                 <div class="kpi-count"><?= $stats['Pendente']['count'] ?></div>
                 <div class="kpi-sum">R$ <?= number_format($stats['Pendente']['sum'], 2, ',', '.') ?></div>
@@ -78,7 +97,7 @@
     </div>
     <div class="col-lg col-md-6">
         <div class="kpi-card paga">
-             <div class="kpi-text">
+            <div class="kpi-text">
                 <div class="kpi-title">Faturas Pagas</div>
                 <div class="kpi-count"><?= $stats['Paga']['count'] ?></div>
                 <div class="kpi-sum">R$ <?= number_format($stats['Paga']['sum'], 2, ',', '.') ?></div>
@@ -88,7 +107,7 @@
     </div>
     <div class="col-lg col-md-6">
         <div class="kpi-card vencida">
-             <div class="kpi-text">
+            <div class="kpi-text">
                 <div class="kpi-title">Faturas Vencidas</div>
                 <div class="kpi-count"><?= $stats['Vencida']['count'] ?></div>
                 <div class="kpi-sum">R$ <?= number_format($stats['Vencida']['sum'], 2, ',', '.') ?></div>
@@ -98,7 +117,7 @@
     </div>
     <div class="col-lg col-md-6">
         <div class="kpi-card cancelada">
-             <div class="kpi-text">
+            <div class="kpi-text">
                 <div class="kpi-title">Faturas Canceladas</div>
                 <div class="kpi-count"><?= $stats['Cancelada']['count'] ?></div>
                 <div class="kpi-sum">R$ <?= number_format($stats['Cancelada']['sum'], 2, ',', '.') ?></div>
@@ -156,7 +175,10 @@
                                 <td class="text-center">
                                     <a href="<?= base_url('dashboard/faturas/visualizar/' . $fatura['id']) ?>" class="btn btn-success btn-sm" title="Visualizar"><i class="fas fa-eye"></i></a>
                                     <a href="<?= base_url('dashboard/faturas/editar/' . $fatura['id']) ?>" class="btn btn-info btn-sm" title="Editar"><i class="fas fa-pencil-alt"></i></a>
-                                    <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal-<?= $fatura['id'] ?>" title="Excluir"><i class="fas fa-trash"></i></a>
+
+                                    <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal-<?= $fatura['id'] ?>" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -175,50 +197,30 @@
 </div>
 
 <div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasFiltersLabel"><i class="fas fa-filter me-2"></i>Filtrar Faturas</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <form action="<?= base_url('dashboard/faturas') ?>" method="get">
-            <div class="mb-3">
-                <label for="status" class="form-label">Status</label>
-                <select class="form-select" name="status" id="status">
-                    <option value="">Todos</option>
-                    <option value="Pendente" <?= (isset($filters['status']) && $filters['status'] == 'Pendente') ? 'selected' : '' ?>>Pendente</option>
-                    <option value="Paga" <?= (isset($filters['status']) && $filters['status'] == 'Paga') ? 'selected' : '' ?>>Paga</option>
-                    <option value="Vencida" <?= (isset($filters['status']) && $filters['status'] == 'Vencida') ? 'selected' : '' ?>>Vencida</option>
-                    <option value="Cancelada" <?= (isset($filters['status']) && $filters['status'] == 'Cancelada') ? 'selected' : '' ?>>Cancelada</option>
-                </select>
-            </div>
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label for="valor_min" class="form-label">Valor Mínimo</label>
-                    <input type="number" step="0.01" class="form-control" name="valor_min" id="valor_min" value="<?= esc($filters['valor_min'] ?? '') ?>">
-                </div>
-                <div class="col-6">
-                    <label for="valor_max" class="form-label">Valor Máximo</label>
-                    <input type="number" step="0.01" class="form-control" name="valor_max" id="valor_max" value="<?= esc($filters['valor_max'] ?? '') ?>">
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label for="data_inicio" class="form-label">Vencimento De</label>
-                    <input type="date" class="form-control" name="data_inicio" id="data_inicio" value="<?= esc($filters['data_inicio'] ?? '') ?>">
-                </div>
-                <div class="col-6">
-                    <label for="data_fim" class="form-label">Vencimento Até</label>
-                    <input type="date" class="form-control" name="data_fim" id="data_fim" value="<?= esc($filters['data_fim'] ?? '') ?>">
-                </div>
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-success">Aplicar Filtros</button>
-                <a href="<?= base_url('dashboard/faturas') ?>" class="btn btn-light">Limpar Filtros</a>
-            </div>
-        </form>
-    </div>
 </div>
 
+<?php if (!empty($faturas)): ?>
+    <?php foreach ($faturas as $fatura): ?>
+        <div class="modal fade" id="confirmDeleteModal-<?= $fatura['id'] ?>" tabindex="-1" aria-labelledby="modalLabel-<?= $fatura['id'] ?>" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLabel-<?= $fatura['id'] ?>">Confirmar Exclusão</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Deseja realmente excluir a fatura ID #<?= esc($fatura['id']) ?> para o cliente "<?= esc($fatura['nome_cliente']) ?>"?</p>
+                        <p class="text-warning"><small>Esta ação não pode ser desfeita.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <a href="<?= base_url('dashboard/faturas/excluir/' . $fatura['id']) ?>" class="btn btn-danger">Confirmar Exclusão</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
 <?php if (!empty($faturas)): ?>
     <?php foreach ($faturas as $fatura): ?>
     <?php endforeach; ?>
@@ -230,19 +232,38 @@
     // Função auxiliar para criar as opções de gráfico
     function getChartOptions(data, color) {
         return {
-            series: [{ data: data }],
-            chart: { type: 'line', height: 60, sparkline: { enabled: true }},
-            stroke: { curve: 'smooth', width: 2 },
+            series: [{
+                data: data
+            }],
+            chart: {
+                type: 'line',
+                height: 60,
+                sparkline: {
+                    enabled: true
+                }
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2
+            },
             colors: [color],
             tooltip: {
-                fixed: { enabled: false },
-                x: { show: false },
+                fixed: {
+                    enabled: false
+                },
+                x: {
+                    show: false
+                },
                 y: {
                     title: {
-                        formatter: function (seriesName) { return '' }
+                        formatter: function(seriesName) {
+                            return ''
+                        }
                     }
                 },
-                marker: { show: false }
+                marker: {
+                    show: false
+                }
             }
         };
     }
@@ -261,7 +282,6 @@
     new ApexCharts(document.querySelector("#chart-paga"), getChartOptions(pagaData, '#fff')).render();
     new ApexCharts(document.querySelector("#chart-vencida"), getChartOptions(vencidaData, '#fff')).render();
     new ApexCharts(document.querySelector("#chart-cancelada"), getChartOptions(canceladaData, '#fff')).render();
-
 </script>
 <?= $this->endSection() ?>
 
