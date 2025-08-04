@@ -23,18 +23,29 @@ class Dashboard extends BaseController
         $data['title'] = 'Dashboard Principal';
         return view('painel/dashboard/index', $data);
     }
-    
+
     // --- MÉTODOS DE FATURAS ---
     public function faturas()
     {
         $faturaModel = new FaturaModel();
-        $data = [
-            'faturas' => $faturaModel
-                ->select('faturas.*, clientes.nome_completo as nome_cliente')
-                ->join('clientes', 'clientes.id = faturas.cliente_id', 'left')
-                ->findAll(),
-            'title'   => 'Minhas Faturas'
+
+        // Coleta todos os possíveis filtros da URL (método GET)
+        $filters = [
+            'status'      => $this->request->getGet('status'),
+            'valor_min'   => $this->request->getGet('valor_min'),
+            'valor_max'   => $this->request->getGet('valor_max'),
+            'data_inicio' => $this->request->getGet('data_inicio'),
+            'data_fim'    => $this->request->getGet('data_fim'),
         ];
+
+        $data = [
+            // Passa os filtros para o novo método de busca do Model
+            'faturas' => $faturaModel->search($filters),
+            'pager'   => $faturaModel->pager, // A paginação continua funcionando
+            'title'   => 'Minhas Faturas',
+            'filters' => $filters // Devolve os filtros para a View para preencher o formulário
+        ];
+
         return view('painel/faturas/index', $data);
     }
 

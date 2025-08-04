@@ -31,4 +31,39 @@ class FaturaModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
+
+
+
+    public function search($filters = [])
+    {
+        // Inicia o Query Builder já com o JOIN que sempre precisamos
+        $builder = $this->select('faturas.*, clientes.nome_completo as nome_cliente')
+            ->join('clientes', 'clientes.id = faturas.cliente_id', 'left');
+
+        // Filtro por status
+        if (!empty($filters['status'])) {
+            $builder->where('faturas.status', $filters['status']);
+        }
+
+        // Filtro por valor mínimo
+        if (!empty($filters['valor_min'])) {
+            $builder->where('faturas.valor >=', $filters['valor_min']);
+        }
+
+        // Filtro por valor máximo
+        if (!empty($filters['valor_max'])) {
+            $builder->where('faturas.valor <=', $filters['valor_max']);
+        }
+
+        // Filtro por período de data de vencimento
+        if (!empty($filters['data_inicio'])) {
+            $builder->where('faturas.data_vencimento >=', $filters['data_inicio']);
+        }
+        if (!empty($filters['data_fim'])) {
+            $builder->where('faturas.data_vencimento <=', $filters['data_fim']);
+        }
+
+        // Retorna os resultados paginados
+        return $builder->paginate(15);
+    }
 }
