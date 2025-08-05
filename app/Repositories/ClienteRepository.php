@@ -14,6 +14,9 @@ class ClienteRepository extends BaseRepository
         $this->model = new ClienteModel();
     }
 
+
+
+    
     // E PRONTO!
     // Não precisamos mais dos métodos getClientePorId, getTodosClientes,
     // criarCliente, atualizarCliente e deletarCliente aqui, pois

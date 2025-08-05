@@ -5,75 +5,75 @@ namespace App\Repositories;
 use CodeIgniter\Model;
 
 /**
- * Classe abstrata BaseRepository
- *
- * Uma classe 'abstract' não pode ser instanciada diretamente.
- * Ela serve como um modelo para outras classes herdarem.
- *
- * Contém todos os métodos CRUD (Create, Read, Update, Delete)
- * que são comuns a todos os repositórios.
+ * Classe abstrata BaseRepository com suporte a multi-tenant.
  */
 abstract class BaseRepository
 {
     /**
      * @var Model
-     * A instância do Model específico (ex: ClienteModel, FaturaModel)
-     * que será usada pelo repositório filho.
      */
     protected $model;
 
     /**
-     * Busca um registro pelo seu ID (chave primária).
-     *
-     * @param int $id
-     * @return array|object|null
+     * @var int|null
+     */
+    protected $tenantId;
+
+    public function __construct()
+    {
+        $this->tenantId = session('tenant_id');
+    }
+
+    /**
+     * Busca um único registro pelo ID, considerando o tenant.
      */
     public function find(int $id)
     {
-        return $this->model->find($id);
+        return $this->model
+            ->where('id', $id)
+            ->where('tenant_id', $this->tenantId)
+            ->first();
     }
 
     /**
-     * Retorna todos os registros da tabela.
-     *
-     * @return array
+     * Retorna todos os registros do tenant atual.
      */
     public function findAll(): array
     {
-        return $this->model->findAll();
+        return $this->model
+            ->where('tenant_id', $this->tenantId)
+            ->findAll();
     }
 
     /**
-     * Cria (insere) um novo registro no banco de dados.
-     *
-     * @param array $data
-     * @return int|string|false O ID do novo registro ou false em caso de falha.
+     * Cria um novo registro com tenant_id injetado automaticamente.
      */
     public function create(array $data)
     {
+        $data['tenant_id'] = $this->tenantId;
         return $this->model->insert($data);
     }
 
     /**
-     * Atualiza um registro existente pelo seu ID.
-     *
-     * @param int $id
-     * @param array $data
-     * @return bool
+     * Atualiza um registro, verificando se pertence ao tenant.
      */
     public function update(int $id, array $data): bool
     {
-        return $this->model->update($id, $data);
+        return $this->model
+            ->where('id', $id)
+            ->where('tenant_id', $this->tenantId)
+            ->set($data)
+            ->update();
     }
 
     /**
-     * Deleta um registro pelo seu ID.
-     *
-     * @param int $id
-     * @return bool
+     * Deleta um registro, garantindo que pertença ao tenant.
      */
     public function delete(int $id): bool
     {
-        return $this->model->delete($id);
+        return $this->model
+            ->where('id', $id)
+            ->where('tenant_id', $this->tenantId)
+            ->delete();
     }
 }
