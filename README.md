@@ -1,99 +1,68 @@
-# Sistema de Login com Painel de Controle - CodeIgniter 4
+# CodeIgniter 4 Application Starter
 
-Este é um projeto de autenticação com painel administrativo desenvolvido em **PHP** utilizando o framework **CodeIgniter 4**. O sistema permite o cadastro e login de usuários com validações básicas e interface customizada com **HTML, CSS e JS**.
+## What is CodeIgniter?
 
----
+CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
+More information can be found at the [official site](https://codeigniter.com).
 
-## 📂 Estrutura do Projeto
+This repository holds a composer-installable app starter.
+It has been built from the
+[development repository](https://github.com/codeigniter4/CodeIgniter4).
 
-```
-📁 app/
-├── Config/
-├── Controllers/
-├── Models/
-├── Views/
-│   ├── login/
-│   └── template/
-├── .htaccess
+More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
 
-📁 public/
-├── index.php
-├── css/
-├── js/
-└── favicon.ico
-```
+You can read the [user guide](https://codeigniter.com/user_guide/)
+corresponding to the latest version of the framework.
 
----
+## Installation & updates
 
-## ⚙️ Tecnologias Utilizadas
+`composer create-project codeigniter4/appstarter` then `composer update` whenever
+there is a new release of the framework.
 
-- PHP 7+
-- CodeIgniter 4
-- Bootstrap 4/5 (dependendo da versão usada no CSS)
-- JavaScript (validações e interações no dashboard)
-- HTML5 + CSS3
+When updating, check the release notes to see if there are any changes you might need to apply
+to your `app` folder. The affected files can be copied or merged from
+`vendor/codeigniter4/framework/app`.
 
----
+## Setup
 
-## 🚀 Funcionalidades
+Copy `env` to `.env` and tailor for your app, specifically the baseURL
+and any database settings.
 
-- Página de login com validação
-- Sessão de usuário autenticado
-- Painel administrativo com estilo personalizado
-- Estrutura MVC organizada
-- Rotas configuradas no `Routes.php`
-- Middleware de autenticação (filtros)
-- Templates reutilizáveis com cabeçalho e rodapé
+## Important Change with index.php
 
----
+`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
+for better security and separation of components.
 
-## 🛠️ Como rodar o projeto localmente
+This means that you should configure your web server to "point" to your project's *public* folder, and
+not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
+framework are exposed.
 
-### Pré-requisitos
+**Please** read the user guide for a better explanation of how CI4 works!
 
-- PHP 7.4 ou superior
-- Composer
-- Servidor Apache/Nginx (recomendado usar Laragon ou XAMPP)
-- Banco de dados MySQL ou SQLite (dependendo da configuração)
+## Repository Management
 
-### Passo a passo
+We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
+We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
+FEATURE REQUESTS.
 
-```bash
-# Clone o repositório
-git clone https://github.com/moaaskt/projeto-login.git
+This repository is a "distribution" one, built by our release preparation script.
+Problems with it can be raised on our forum, or as issues in the main repository.
 
-# Acesse o diretório
-cd projeto-login
+## Server Requirements
 
-# Instale as dependências do CodeIgniter (se necessário)
-composer install
+PHP version 8.1 or higher is required, with the following extensions installed:
 
-# Configure o arquivo .env com suas variáveis de ambiente
-cp env .env
+- [intl](http://php.net/manual/en/intl.requirements.php)
+- [mbstring](http://php.net/manual/en/mbstring.installation.php)
 
-# Gere a chave de encriptação do framework
-php spark key:generate
+> [!WARNING]
+> - The end of life date for PHP 7.4 was November 28, 2022.
+> - The end of life date for PHP 8.0 was November 26, 2023.
+> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
+> - The end of life date for PHP 8.1 will be December 31, 2025.
 
-# Rode o servidor local
-php spark serve
-```
+Additionally, make sure that the following extensions are enabled in your PHP:
 
----
-
-## 📸 Imagens do sistema
-
-> Adicione capturas de tela do painel e da tela de login para ilustrar melhor o projeto.
-
----
-
-## ✍️ Autor
-
-**moaaskt**  
-Desenvolvedor de sistemas apaixonado por tecnologia, skate e projetos criativos.  
-GitHub: [@moaaskt](https://github.com/moaaskt)
-
----
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+- json (enabled by default - don't turn it off)
+- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
+- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
