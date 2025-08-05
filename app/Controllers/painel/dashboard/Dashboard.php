@@ -18,8 +18,6 @@ class Dashboard extends BaseController
         $this->usuarioData = $this->session->get('usuario');
     }
 
-    // Em app/Controllers/painel/dashboard/Dashboard.php
-
     public function index()
     {
         if (empty($this->usuarioData)) {
@@ -29,61 +27,68 @@ class Dashboard extends BaseController
         $faturaModel = new FaturaModel();
         $clienteModel = new ClienteModel();
 
-        // --- PREPARAÇÃO COMPLETA DE DADOS PARA OS GRÁFICOS ---
+        // --- PREPARAÇÃO COMPLETA DE DADOS ---
 
-        // 1. Define a linha do tempo (últimos 6 meses)
+        // Dados para Gráfico de Status
+        $statusData = $faturaModel->getStatusDistribution() ?? [];
+        $statusLabels = [];
+        $statusSeries = [];
+        foreach ($statusData as $status) {
+            $statusLabels[] = $status['status'];
+            $statusSeries[] = (int)$status['count'];
+        }
+
+        // Dados para Gráfico Comparativo
         $labels = [];
         for ($i = 5; $i >= 0; $i--) {
             $labels[] = date("Y-m", strtotime("-$i months"));
         }
-
-        // 2. Cria arrays "esqueleto" com zeros
         $revenueSeries = array_fill_keys($labels, 0);
         $billedSeries = array_fill_keys($labels, 0);
         $clientSeries = array_fill_keys($labels, 0);
 
-        // 3. Busca os dados reais do banco
         $monthlyRevenueData = $faturaModel->getMonthlyRevenue() ?? [];
         $monthlyBilledData = $faturaModel->getMonthlyBilled() ?? [];
         $newClientsData = $clienteModel->getNewClientsPerMonth() ?? [];
-
-        // 4. Preenche os arrays com os dados reais
+        
         foreach ($monthlyRevenueData as $row) {
-            if (isset($revenueSeries[$row['mes']])) {
-                $revenueSeries[$row['mes']] = (float)$row['total'];
-            }
+            if (isset($revenueSeries[$row['mes']])) { $revenueSeries[$row['mes']] = (float)$row['total']; }
         }
         foreach ($monthlyBilledData as $row) {
-            if (isset($billedSeries[$row['mes']])) {
-                $billedSeries[$row['mes']] = (float)$row['total'];
-            }
+            if (isset($billedSeries[$row['mes']])) { $billedSeries[$row['mes']] = (float)$row['total']; }
         }
         foreach ($newClientsData as $row) {
-            if (isset($clientSeries[$row['mes']])) {
-                $clientSeries[$row['mes']] = (int)$row['count'];
-            }
+            if (isset($clientSeries[$row['mes']])) { $clientSeries[$row['mes']] = (int)$row['count']; }
         }
-
+        
         $chartLabels = array_map(fn($mes) => date('M/Y', strtotime($mes)), $labels);
 
-        // 5. Monta o array final e completo para a View
+        // Montagem final do array de dados
         $data = [
             'email'          => $this->usuarioData['email'],
             'title'          => 'Dashboard Principal',
             'stats'          => $faturaModel->getDashboardStatistics(),
-            'chartLabels'    => json_encode($chartLabels),
-            'revenueSeries'  => json_encode(array_values($revenueSeries)),
-            'billedSeries'   => json_encode(array_values($billedSeries)), // <-- GARANTIDO QUE ESTÁ AQUI
+            'statusLabels'   => json_encode($statusLabels),
+            'statusSeries'   => json_encode($statusSeries),
+            'clientLabels'   => json_encode($chartLabels), // Usando o label de meses unificado
             'clientSeries'   => json_encode(array_values($clientSeries)),
+            'revenueLabels'  => json_encode($chartLabels), // Usando o label de meses unificado
+            'billedSeries'   => json_encode(array_values($billedSeries)),
+            'revenueSeries'  => json_encode(array_values($revenueSeries)),
+
+             'chartLabels'    => json_encode($chartLabels),
         ];
 
         return view('painel/dashboard/index', $data);
     }
-
     
+    // Todos os outros métodos (faturas, clientes, perfil, etc.) foram movidos para seus controllers
+    // Se ainda estiverem aqui, apague-os. O DashboardController deve ter apenas o index() e o __construct().
+    // Vou deixá-los aqui por enquanto, caso você não tenha criado os outros controllers.
+    
+    // --- MÉTODOS DE PERFIL ---
     public function perfil()
     {
-
         $data = ['title' => 'Meu Perfil'];
         return view('painel/perfil/index', $data);
     }
