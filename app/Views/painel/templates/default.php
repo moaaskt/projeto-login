@@ -111,6 +111,8 @@
     <script src="<?= base_url('js/dashboard.js') ?>"></script>
 
     <?= $this->renderSection('scripts') ?>
+    <?= $this->section('pageScripts') ?>
+<?= $this->endSection() ?>
 </body>
 
 </html>

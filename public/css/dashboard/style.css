@@ -3,7 +3,7 @@ body, html {
   margin: 0;
   padding: 0;
   height: 100vh;
-  overflow: hidden;
+  overflow: auto;
   background: #0f172a;
   color: #cbd5e1;
   font-family: 'Inter', sans-serif;
@@ -12,7 +12,7 @@ body, html {
 .dashboard-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 95vh;
   padding: 1rem;
   box-sizing: border-box;
 }
