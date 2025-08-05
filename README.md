@@ -79,10 +79,17 @@ php spark serve
 ```
 
 ---
-
 ## 📸 Imagens do sistema
 
-> Adicione capturas de tela do painel e da tela de login para ilustrar melhor o projeto.
+### 🔐 Tela de Login
+![Tela de Login](https://raw.githubusercontent.com/moaaskt/projeto-login/refs/heads/main/public/assets/imgs/FireShot%20Capture%20021%20-%20Login%20-%20Doar%20Digital%20-%20%5Bprojeto-login.test%5D.png)
+
+### 📊 Dashboard - Visão Geral
+![Dashboard Geral](https://raw.githubusercontent.com/moaaskt/projeto-login/refs/heads/main/public/assets/imgs/FireShot%20Capture%20019%20-%20Dashboard%20-%20CRM%20Dashboard%20-%20%5Bprojeto-login.test%5D%20(1).png)
+
+### 📊 Dashboard - Detalhado
+![Dashboard Detalhado](https://raw.githubusercontent.com/moaaskt/projeto-login/refs/heads/main/public/assets/imgs/FireShot%20Capture%20020%20-%20-%20CRM%20Dashboard%20-%20%5Bprojeto-login.test%5D.png)
+
 
 ---
 
