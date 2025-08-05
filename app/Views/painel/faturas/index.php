@@ -221,11 +221,6 @@
         </div>
     <?php endforeach; ?>
 <?php endif; ?>
-<?php if (!empty($faturas)): ?>
-    <?php foreach ($faturas as $fatura): ?>
-    <?php endforeach; ?>
-<?php endif; ?>
-
 
 <?= $this->section('scripts') ?>
 <script>

@@ -80,21 +80,24 @@
   </div>
 </div>
 
+
+
 <?php if (!empty($clientes)): ?>
     <?php foreach ($clientes as $cliente): ?>
-        <div class="modal fade" id="confirmDeleteModal-<?= $cliente['id'] ?>" tabindex="-1">
+        <div class="modal fade" id="confirmDeleteModal-<?= $cliente['id'] ?>" tabindex="-1" aria-labelledby="modalLabel-<?= $cliente['id'] ?>" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content bg-dark text-white">
                     <div class="modal-header">
-                        <h5 class="modal-title">Confirmar Exclusão</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        <h5 class="modal-title" id="modalLabel-<?= $cliente['id'] ?>">Confirmar Exclusão</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <p>Deseja realmente excluir o cliente "<?= esc($cliente['nome_completo']) ?>"?</p>
+                        <p class="text-warning"><small>Esta ação não pode ser desfeita.</small></p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <a href="<?= base_url('dashboard/clientes/excluir/' . $cliente['id']) ?>" class="btn btn-danger">Excluir</a>
+                        <a href="<?= base_url('dashboard/clientes/excluir/' . $cliente['id']) ?>" class="btn btn-danger">Confirmar Exclusão</a>
                     </div>
                 </div>
             </div>
