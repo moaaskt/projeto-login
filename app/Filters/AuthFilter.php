@@ -25,8 +25,9 @@ class AuthFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-       if (! session()->get('logged_in')) {
-            return redirect()->to(base_url('/'));
+        if (! session()->get('logged_in')) {
+            // Adiciona uma mensagem flash que será exibida na página de login
+            return redirect()->to(base_url('/'))->with('msg', 'Você precisa estar logado para acessar esta página.');
         }
     }
 

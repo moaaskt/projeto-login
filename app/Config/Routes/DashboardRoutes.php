@@ -24,4 +24,8 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
 
     // Rota de Perfil
     $routes->get('perfil', 'painel\dashboard\Dashboard::perfil');
+
+
+
+    
 });

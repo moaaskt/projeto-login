@@ -14,6 +14,8 @@ $routes->setAutoRoute(false);
 
 $routes->get('/', 'auth\login\Login::index');
 
+
+
 if (is_file(APPPATH . 'Config/Routes/Auth.php')) {
     require APPPATH . 'Config/Routes/Auth.php';
 }

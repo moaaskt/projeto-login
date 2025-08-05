@@ -3,12 +3,14 @@
 namespace App\Controllers\auth\cadastro;
 
 use App\Controllers\BaseController;
-use App\Models\UsuarioModel; // <-- 1. CORREÇÃO AQUI
+// 1. TROCAMOS o 'use' do Model pelo 'use' do nosso UserRepository.
+use App\Repositories\UserRepository;
 
 class Cadastro extends BaseController
 {
     /**
      * Exibe a página com o formulário de cadastro.
+     * (Este método não muda)
      */
     public function index()
     {
@@ -20,7 +22,8 @@ class Cadastro extends BaseController
      */
     public function store()
     {
-        // 1. Define as regras de validação
+        // A sua lógica de validação continua EXATAMENTE a mesma.
+        // Ela é perfeita e não precisa ser alterada.
         $regras = [
             'nome'  => 'required|min_length[3]',
             'email' => 'required|valid_email|is_unique[usuarios.email]',
@@ -28,25 +31,26 @@ class Cadastro extends BaseController
             'confirmar_senha' => 'required|matches[senha]'
         ];
 
-        // 2. Executa a validação
         if (!$this->validate($regras)) {
-            // Se a validação falhar, retorna para o formulário com os erros
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // 3. Se a validação passar, continua para salvar
-        $usuarioModel = new \App\Models\UsuarioModel();
+        // 2. Se a validação passar, a mágica acontece aqui.
+        // Criamos uma instância do nosso repositório.
+        $repo = new UserRepository();
+
+        // Pegamos todos os dados do formulário de uma vez.
         $dados = $this->request->getPost();
 
-        $dadosParaSalvar = [
-            'nome'   => $dados['nome'],
-            'email'  => $dados['email'],
-            'senha'  => password_hash($dados['senha'], PASSWORD_DEFAULT),
-        ];
-
-        if ($usuarioModel->insert($dadosParaSalvar)) {
+        // 3. AQUI ESTÁ A GRANDE MUDANÇA:
+        // Chamamos nosso método 'criarUsuario'.
+        // Não precisamos mais nos preocupar em hashear a senha aqui.
+        // O repositório cuida disso para nós! O controller fica mais limpo.
+        if ($repo->criarUsuario($dados)) {
+            // A sua lógica de redirecionamento de sucesso continua a mesma.
             return redirect()->to(base_url('/'))->with('success', 'Cadastro realizado com sucesso! Faça seu login.');
         } else {
+            // A sua lógica de redirecionamento de falha continua a mesma.
             return redirect()->back()->withInput()->with('error', 'Ocorreu uma falha ao realizar o cadastro.');
         }
     }

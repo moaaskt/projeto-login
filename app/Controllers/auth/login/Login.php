@@ -1,30 +1,40 @@
 <?php
 
+// O namespace continua exatamente o mesmo
 namespace App\Controllers\auth\login;
 
 use App\Controllers\BaseController;
-use App\Models\UsuarioModel;
+// 1. TROCAMOS o 'use' do Model pelo 'use' do Repository.
+// O Controller não precisa mais saber do Model, apenas do Repository.
+use App\Repositories\UserRepository;
 
 class Login extends BaseController
 {
+    // O método index() continua igual.
     public function index()
     {
         return view('auth/login/index');
     }
 
+    // A mágica acontece aqui no método auth()
     public function auth()
     {
         $session = session();
-        $model = new UsuarioModel();
+        // 2. TROCAMOS a criação do Model pela criação do Repository.
+        $repo = new UserRepository();
 
-        // Pega os dados do formulário
+        // A captura dos dados do formulário continua igual.
         $email = $this->request->getPost('email');
         $senha = $this->request->getPost('password');
 
-        // Busca o usuário no banco de dados pelo e-mail
-        $usuario = $model->where('email', $email)->first();
+        // 3. AQUI ESTÁ A GRANDE MUDANÇA:
+        // Em vez de $model->where(...), usamos nosso método limpo do repositório.
+        // A responsabilidade de saber COMO buscar no banco foi para o Repository.
+        $usuario = $repo->getUsuarioPorEmail($email);
 
-        // Verifica se encontrou um usuário E se a senha está correta
+        // O resto do seu código, com toda a lógica de verificação de senha,
+        // criação de sessão e redirecionamentos, continua EXATAMENTE IGUAL,
+        // pois ele não se importa de onde a variável $usuario veio.
         if ($usuario && password_verify($senha, $usuario['senha'])) {
             // Se a verificação for bem-sucedida...
 
@@ -47,6 +57,7 @@ class Login extends BaseController
         }
     }
 
+    // O método logout() continua igual.
     public function logout()
     {
         session()->destroy();
