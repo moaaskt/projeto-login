@@ -4,27 +4,6 @@ Este é um projeto de autenticação com painel administrativo desenvolvido em *
 
 ---
 
-## 📂 Estrutura do Projeto
-
-```
-📁 app/
-├── Config/
-├── Controllers/
-├── Models/
-├── Views/
-│   ├── login/
-│   └── template/
-├── .htaccess
-
-📁 public/
-├── index.php
-├── css/
-├── js/
-└── favicon.ico
-```
-
----
-
 ## ⚙️ Tecnologias Utilizadas
 
 - PHP 7+
