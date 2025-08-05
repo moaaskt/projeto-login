@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // ----- Gráfico Distribuição de Status (donut) -----
+
+    // ----- Gráfico 1: Distribuição de Status (Donut) -----
     const statusEl = document.getElementById('statusChart');
     if (statusEl) {
         const seriesStatus = JSON.parse(statusEl.getAttribute('data-series'));
@@ -9,19 +10,15 @@ document.addEventListener('DOMContentLoaded', function () {
             chart: { type: 'donut', height: 350, foreColor: '#cbd5e1' },
             series: seriesStatus,
             labels: labelsStatus,
-            colors: ['#22c55e', '#ef4444', '#fbbf24', '#f97316'],
-            legend: { position: 'bottom', labels: { colors: '#94a3b8' } },
-            tooltip: {
-                fillSeriesColor: false,
-                y: { formatter: function (val) { return val + ' fatura(s)'; } }
-            }
+            theme: { monochrome: { enabled: true, color: '#6366f1', shadeTo: 'dark', shadeIntensity: 0.65 }},
+            plotOptions: { pie: { donut: { labels: { show: true, total: { show: true, label: 'Total', color: '#fff' }}}}},
+            legend: { labels: { colors: ['#fff'] }},
         };
         const chartStatus = new ApexCharts(statusEl, optionsStatus);
         chartStatus.render();
     }
 
-
-    // ----- Gráfico Novos Clientes por Mês (área) -----
+    // ----- Gráfico 2: Novos Clientes por Mês (Área) -----
     const clientesEl = document.getElementById('clientesChart');
     if (clientesEl) {
         const seriesClientes = JSON.parse(clientesEl.getAttribute('data-series'));
@@ -30,75 +27,54 @@ document.addEventListener('DOMContentLoaded', function () {
         const optionsClientes = {
             chart: { type: 'area', height: 350, foreColor: '#cbd5e1', toolbar: { show: false } },
             series: [{ name: 'Clientes Novos', data: seriesClientes }],
-            xaxis: { categories: categoriesClientes, axisBorder: { color: '#475569' }, axisTicks: { color: '#475569' } },
-            yaxis: { labels: { formatter: function (val) { return val.toFixed(0); } } },
+            xaxis: { categories: categoriesClientes, axisBorder: { color: '#475569' }, axisTicks: { color: '#475569' }, labels: { style: { colors: '#ccc' } } },
+            yaxis: { labels: { style: { colors: '#ccc' }, formatter: function (val) { return val.toFixed(0); } }},
             dataLabels: { enabled: false },
             stroke: { curve: 'smooth', width: 3 },
-            fill: {
-                type: 'gradient',
-                gradient: { shadeIntensity: 1, opacityFrom: 0.6, opacityTo: 0, stops: [0, 90, 100] }
-            },
-            tooltip: {
-                shared: true,
-                intersect: false,
-                y: { formatter: function (val) { return val + ' clientes'; } }
-            },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.6, opacityTo: 0.1, stops: [0, 90, 100] }},
             grid: { borderColor: '#334155', strokeDashArray: 3 }
         };
         const chartClientes = new ApexCharts(clientesEl, optionsClientes);
         chartClientes.render();
     }
 
-    // ----- GRÁFICO DE FATURAMENTO MENSAL (NOVO) -----
-    const revenueEl = document.getElementById('revenueChart');
-    if (revenueEl) {
-        const seriesRevenue = JSON.parse(revenueEl.getAttribute('data-series'));
-        const labelsRevenue = JSON.parse(revenueEl.getAttribute('data-labels'));
+    // ----- Gráfico 3: Comparativo Mensal (Colunas) -----
+    const comparisonEl = document.getElementById('comparisonChart');
+    if (comparisonEl) {
+        const labels = JSON.parse(comparisonEl.getAttribute('data-labels'));
+        const revenueSeries = JSON.parse(comparisonEl.getAttribute('data-revenue'));
+        const billedSeries = JSON.parse(comparisonEl.getAttribute('data-billed'));
+        const clientSeries = JSON.parse(comparisonEl.getAttribute('data-clients'));
 
-        const optionsRevenue = {
-            series: [{
-                name: 'Faturamento R$',
-                data: seriesRevenue
-            }],
-            chart: {
-                type: 'bar',
-                height: 350,
-                foreColor: '#cbd5e1'
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    borderRadius: 4
-                },
-            },
+        const options = {
+            series: [
+                { name: 'Faturamento (R$)', data: revenueSeries },
+                { name: 'Total Emitido (R$)', data: billedSeries },
+                { name: 'Novos Clientes', data: clientSeries }
+            ],
+            chart: { type: 'bar', height: 400, foreColor: '#ccc' },
+            plotOptions: { bar: { horizontal: false, columnWidth: '55%' }},
             dataLabels: { enabled: false },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            xaxis: {
-                categories: labelsRevenue,
-                labels: { style: { colors: '#cbd5e1' } }
-            },
-            yaxis: {
-                title: { text: 'R$ (reais)', style: { color: '#cbd5e1' } },
-                labels: { style: { colors: '#cbd5e1' } }
-            },
+            stroke: { show: true, width: 2, colors: ['transparent'] },
+            xaxis: { categories: labels, labels: { style: { colors: '#ccc' } }},
+            yaxis: { title: { text: 'Valores', style: { color: '#ccc' } }, labels: { style: { colors: '#ccc' } }},
             fill: { opacity: 1 },
             tooltip: {
                 theme: 'dark',
                 y: {
-                    formatter: function (val) {
-                        return "R$ " + val.toFixed(2).replace('.', ',');
+                    formatter: function (val, { seriesIndex }) {
+                        if (seriesIndex < 2) {
+                            return "R$ " + val.toFixed(2).replace('.', ',');
+                        } else {
+                            return val + " clientes";
+                        }
                     }
                 }
             },
-            grid: { borderColor: '#334155' }
+            colors: ['#008FFB', '#00E396', '#FEB019'],
+            grid: { borderColor: '#555' }
         };
-
-        const chartRevenue = new ApexCharts(revenueEl, optionsRevenue);
-        chartRevenue.render();
+        const comparisonChart = new ApexCharts(comparisonEl, options);
+        comparisonChart.render();
     }
 });

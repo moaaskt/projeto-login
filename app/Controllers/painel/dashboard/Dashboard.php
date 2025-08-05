@@ -18,6 +18,8 @@ class Dashboard extends BaseController
         $this->usuarioData = $this->session->get('usuario');
     }
 
+    // Em app/Controllers/painel/dashboard/Dashboard.php
+
     public function index()
     {
         if (empty($this->usuarioData)) {
@@ -27,44 +29,52 @@ class Dashboard extends BaseController
         $faturaModel = new FaturaModel();
         $clienteModel = new ClienteModel();
 
-        // 1. Prepara dados para o gráfico de Status (Donut)
-        $statusData = $faturaModel->getStatusDistribution();
-        $statusLabels = [];
-        $statusSeries = [];
-        foreach ($statusData as $status) {
-            $statusLabels[] = $status['status'];
-            $statusSeries[] = (int)$status['count'];
+        // --- PREPARAÇÃO COMPLETA DE DADOS PARA OS GRÁFICOS ---
+
+        // 1. Define a linha do tempo (últimos 6 meses)
+        $labels = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $labels[] = date("Y-m", strtotime("-$i months"));
         }
 
-        // 2. Prepara dados para o gráfico de Novos Clientes (Barras)
-        $newClientsData = $clienteModel->getNewClientsPerMonth();
-        $clientLabels = [];
-        $clientSeries = [];
-        foreach ($newClientsData as $client) {
-            $clientLabels[] = date('M/Y', strtotime($client['mes']));
-            $clientSeries[] = (int)$client['count'];
+        // 2. Cria arrays "esqueleto" com zeros
+        $revenueSeries = array_fill_keys($labels, 0);
+        $billedSeries = array_fill_keys($labels, 0);
+        $clientSeries = array_fill_keys($labels, 0);
+
+        // 3. Busca os dados reais do banco
+        $monthlyRevenueData = $faturaModel->getMonthlyRevenue() ?? [];
+        $monthlyBilledData = $faturaModel->getMonthlyBilled() ?? [];
+        $newClientsData = $clienteModel->getNewClientsPerMonth() ?? [];
+
+        // 4. Preenche os arrays com os dados reais
+        foreach ($monthlyRevenueData as $row) {
+            if (isset($revenueSeries[$row['mes']])) {
+                $revenueSeries[$row['mes']] = (float)$row['total'];
+            }
+        }
+        foreach ($monthlyBilledData as $row) {
+            if (isset($billedSeries[$row['mes']])) {
+                $billedSeries[$row['mes']] = (float)$row['total'];
+            }
+        }
+        foreach ($newClientsData as $row) {
+            if (isset($clientSeries[$row['mes']])) {
+                $clientSeries[$row['mes']] = (int)$row['count'];
+            }
         }
 
-        // 3. Prepara dados para o gráfico de Faturamento (Colunas)
-        $monthlyRevenueData = $faturaModel->getMonthlyRevenue();
-        $revenueLabels = [];
-        $revenueSeries = [];
-        foreach ($monthlyRevenueData as $revenue) {
-            $revenueLabels[] = date('M/Y', strtotime($revenue['mes']));
-            $revenueSeries[] = (float)$revenue['total'];
-        }
+        $chartLabels = array_map(fn($mes) => date('M/Y', strtotime($mes)), $labels);
 
-        // 4. Monta o array final de dados para a View
+        // 5. Monta o array final e completo para a View
         $data = [
-            'email'              => $this->usuarioData['email'],
-            'title'              => 'Dashboard Principal',
-            'stats'              => $faturaModel->getDashboardStatistics(),
-            'statusLabels'       => json_encode($statusLabels),
-            'statusSeries'       => json_encode($statusSeries),
-            'clientLabels'       => json_encode($clientLabels),
-            'clientSeries'       => json_encode($clientSeries),
-            'revenueLabels'      => json_encode($revenueLabels),
-            'revenueSeries'      => json_encode($revenueSeries),
+            'email'          => $this->usuarioData['email'],
+            'title'          => 'Dashboard Principal',
+            'stats'          => $faturaModel->getDashboardStatistics(),
+            'chartLabels'    => json_encode($chartLabels),
+            'revenueSeries'  => json_encode(array_values($revenueSeries)),
+            'billedSeries'   => json_encode(array_values($billedSeries)), // <-- GARANTIDO QUE ESTÁ AQUI
+            'clientSeries'   => json_encode(array_values($clientSeries)),
         ];
 
         return view('painel/dashboard/index', $data);
