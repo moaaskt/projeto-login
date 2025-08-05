@@ -4,41 +4,29 @@ namespace App\Repositories;
 
 use App\Models\UsuarioModel;
 
-// O nome da classe agora reflete a entidade que ela gerencia: Usuário.
-class UserRepository
+class UserRepository extends BaseRepository
 {
-    private $usuarioModel;
-
     public function __construct()
     {
-        $this->usuarioModel = new UsuarioModel();
+        $this->model = new UsuarioModel();
     }
 
     /**
-     * Busca um usuário no banco de dados pelo seu e-mail.
-     * (Este método continua igual)
+     * Este é um método específico de usuário, então ele permanece aqui.
      */
     public function getUsuarioPorEmail(string $email)
     {
-        return $this->usuarioModel->where('email', $email)->first();
+        return $this->model->where('email', $email)->first();
     }
 
     /**
-     * **NOVO MÉTODO**
-     * Cria um novo usuário no banco de dados.
-     *
-     * @param array $dados Os dados do novo usuário (ex: ['nome' => '...', 'email' => '...', 'senha' => '...'])
-     * @return bool Retorna true se a inserção foi bem-sucedida, false caso contrário.
+     * Sobrescrevemos o método 'create' da BaseRepository
+     * para adicionar a lógica de hash da senha, que é
+     * uma regra de negócio específica da criação de usuários.
      */
-    public function criarUsuario(array $dados)
+    public function create(array $dados): int|string|false
     {
-        // Medida de segurança ESSENCIAL:
-        // Nunca salve a senha como texto puro. Usamos password_hash()
-        // para criar uma versão criptografada e segura da senha.
         $dados['senha'] = password_hash($dados['senha'], PASSWORD_DEFAULT);
-
-        // O método insert() do Model do CodeIgniter cuida da criação.
-        // Ele retorna true em caso de sucesso.
-        return $this->usuarioModel->insert($dados);
+        return parent::create($dados); // Chama o método 'create' original da BaseRepository
     }
 }
