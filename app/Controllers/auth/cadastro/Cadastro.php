@@ -20,29 +20,34 @@ class Cadastro extends BaseController
      */
     public function store()
     {
-        // Pega os dados do formulário
-        $dados = $this->request->getPost();
+        // 1. Define as regras de validação
+        $regras = [
+            'nome'  => 'required|min_length[3]',
+            'email' => 'required|valid_email|is_unique[usuarios.email]',
+            'senha' => 'required|min_length[8]',
+            'confirmar_senha' => 'required|matches[senha]'
+        ];
 
-        // Validação simples
-        if ($dados['senha'] !== $dados['confirmar_senha']) {
-            return redirect()->back()->withInput()->with('error', 'As senhas não conferem. Tente novamente.');
+        // 2. Executa a validação
+        if (!$this->validate($regras)) {
+            // Se a validação falhar, retorna para o formulário com os erros
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // Prepara os dados para salvar
-        $usuarioModel = new UsuarioModel(); // <-- 2. CORREÇÃO AQUI
+        // 3. Se a validação passar, continua para salvar
+        $usuarioModel = new \App\Models\UsuarioModel();
+        $dados = $this->request->getPost();
 
-        // Criptografa a senha antes de salvar!
         $dadosParaSalvar = [
             'nome'   => $dados['nome'],
             'email'  => $dados['email'],
             'senha'  => password_hash($dados['senha'], PASSWORD_DEFAULT),
         ];
 
-        // Tenta inserir no banco de dados
         if ($usuarioModel->insert($dadosParaSalvar)) {
             return redirect()->to(base_url('/'))->with('success', 'Cadastro realizado com sucesso! Faça seu login.');
         } else {
-            return redirect()->back()->withInput()->with('error', 'Ocorreu uma falha ao realizar o cadastro. Tente novamente.');
+            return redirect()->back()->withInput()->with('error', 'Ocorreu uma falha ao realizar o cadastro.');
         }
     }
 }

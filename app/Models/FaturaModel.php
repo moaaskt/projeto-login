@@ -120,7 +120,7 @@ class FaturaModel extends Model
     /**
      * Retorna o faturamento (soma de faturas pagas) por mês para um gráfico.
      */
-    public function getMonthlyRevenue()
+     public function getMonthlyRevenue()
     {
         return $this->select("SUM(valor) as total, DATE_FORMAT(data_pagamento, '%Y-%m') as mes")
                     ->where('status', 'Paga')

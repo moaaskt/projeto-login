@@ -8,8 +8,18 @@
 
 <div class="card">
     <div class="card-body">
+        <?php if (session()->get('errors')): ?>
+            <div class="alert alert-danger">
+                <p><strong>Por favor, corrija os erros abaixo:</strong></p>
+                <ul>
+                    <?php foreach (session()->get('errors') as $error): ?>
+                        <li><?= esc($error) ?></li>
+                    <?php endforeach ?>
+                </ul>
+            </div>
+        <?php endif; ?>
         <form action="<?= base_url('dashboard/clientes/salvar') ?>" method="post">
-            
+
             <input type="hidden" name="id" value="<?= isset($cliente) ? esc($cliente['id']) : '' ?>">
 
             <div class="row">
@@ -38,7 +48,7 @@
                 <label for="endereco" class="form-label">Endereço</label>
                 <textarea class="form-control" id="endereco" name="endereco" rows="3"><?= isset($cliente) ? esc($cliente['endereco']) : '' ?></textarea>
             </div>
-            
+
             <div class="mt-4">
                 <button type="submit" class="btn btn-success">Salvar</button>
                 <a href="<?= base_url('dashboard/clientes') ?>" class="btn btn-secondary">Cancelar</a>
