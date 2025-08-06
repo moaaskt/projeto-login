@@ -1,45 +1,48 @@
-// public/js/viacep.js
 document.addEventListener('DOMContentLoaded', function () {
     const cepInput = document.getElementById('cep');
+    if (!cepInput) return;
 
-    if (!cepInput) {
-        return; // Sai se o campo CEP não existir na página
-    }
-
-    cepInput.addEventListener('blur', function () {
-        const cep = this.value.replace(/\D/g, ''); // Remove tudo que não for número
-
-        if (cep.length !== 8) {
-            return; // CEP inválido
-        }
-
-        // Feedback visual para o usuário
-        setAddressFieldsReadOnly(true, 'Buscando...');
-
-        fetch(`https://viacep.com.br/ws/${cep}/json/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.erro) {
-                    // CEP não encontrado
-                    setAddressFieldsReadOnly(false, '');
-                    clearAddressFields();
-                    alert('CEP não encontrado. Por favor, verifique o número.');
-                } else {
-                    // Sucesso! Preenche os campos
-                    document.getElementById('logradouro').value = data.logradouro;
-                    document.getElementById('bairro').value = data.bairro;
-                    document.getElementById('cidade').value = data.localidade;
-                    document.getElementById('estado').value = data.uf;
-                    setAddressFieldsReadOnly(false, '');
-                    document.getElementById('numero').focus(); // Move o foco para o campo "número"
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao buscar CEP:', error);
-                setAddressFieldsReadOnly(false, '');
-            });
+    // 1. Aplica a máscara do CEP diretamente aqui
+    const cepMask = IMask(cepInput, {
+        mask: '00000-000'
     });
 
+    // 2. Função de busca usando async/await
+    const buscarCep = async (cep) => {
+        // Feedback visual para o usuário
+        setAddressFieldsReadOnly(true, 'Buscando...');
+        
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            if (!response.ok) throw new Error('Erro na requisição');
+
+            const data = await response.json();
+
+            if (data.erro) {
+                clearAddressFields();
+                // Poderia ser um alerta mais amigável
+            } else {
+                document.getElementById('logradouro').value = data.logradouro;
+                document.getElementById('bairro').value = data.bairro;
+                document.getElementById('cidade').value = data.localidade;
+                document.getElementById('estado').value = data.uf;
+                document.getElementById('numero').focus();
+            }
+        } catch (error) {
+            console.error('Erro ao buscar CEP:', error);
+            clearAddressFields();
+        } finally {
+            // Acontece sempre, com sucesso ou erro
+            setAddressFieldsReadOnly(false, '');
+        }
+    };
+
+    // 3. Aciona a busca quando o usuário termina de digitar (8 dígitos)
+    cepMask.on('complete', function () {
+        buscarCep(cepMask.unmaskedValue);
+    });
+
+    // Funções auxiliares (sem alteração)
     function setAddressFieldsReadOnly(isReadOnly, placeholderText) {
         document.getElementById('logradouro').readOnly = isReadOnly;
         document.getElementById('logradouro').placeholder = placeholderText;
