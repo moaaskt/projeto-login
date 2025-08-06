@@ -111,6 +111,7 @@
     <script src="https://unpkg.com/imask"></script>
     <script src="<?= base_url('js/dashboard.js') ?>"></script>
     <script src="<?= base_url('js/masks.js') ?>"></script> <?= $this->renderSection('pageScripts') ?>
+    <script src="<?= base_url('js/viacep.js') ?>"></script>
 </body>
 
 </html>

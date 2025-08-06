@@ -10,22 +10,26 @@ class ClienteModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = true; 
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
 
     protected $allowedFields    = [
-        'nome_completo', 
+        'nome_completo',
         'cpf_cnpj',
         'email',
         'telefone',
-        'endereco',
+        'logradouro', 
+        'numero',     
+        'bairro',     
+        'cidade',     
+        'estado',     
         'cep',
         'data_nascimento',
-        'deleted_at', 
+        'deleted_at',
     ];
 
     // Dates
-    protected $useTimestamps = true; 
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';

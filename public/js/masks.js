@@ -24,6 +24,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+        const cepInput = document.getElementById('cep');
+    if (cepInput) {
+        IMask(cepInput, {
+            mask: '00000-000'
+        });
+    }
+
+      const dataNascimentoInput = document.getElementById('data_nascimento');
+    if(dataNascimentoInput) {
+        IMask(dataNascimentoInput, {
+            mask: '00/00/0000'
+        });
+    }
+
+
     // --- Máscara dinâmica para Telefone (fixo e celular) ---
     const telefoneInput = document.getElementById('telefone');
     if (telefoneInput) {
@@ -47,4 +62,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+
+
+
+
+
+
+    
+
 });
+

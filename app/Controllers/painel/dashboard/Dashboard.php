@@ -6,87 +6,120 @@ use App\Controllers\BaseController;
 use App\Models\ClienteModel;
 use App\Models\FaturaModel;
 
-
 class Dashboard extends BaseController
 {
     protected $session;
     protected $usuarioData;
+    private $faturaModel;
+    private $clienteModel;
 
     public function __construct()
     {
         $this->session = session();
         $this->usuarioData = $this->session->get('usuario');
+        
+        // Instanciamos os models uma única vez aqui
+        $this->faturaModel = new FaturaModel();
+        $this->clienteModel = new ClienteModel();
     }
 
+    /**
+     * MÉTODO PÚBLICO - O "CARDÁPIO"
+     * Agora ele está limpo, curto e apenas orquestra as tarefas.
+     */
     public function index()
     {
         if (empty($this->usuarioData)) {
             return redirect()->to(base_url('logout'));
         }
 
-        $faturaModel = new FaturaModel();
-        $clienteModel = new ClienteModel();
-
-        // --- PREPARAÇÃO COMPLETA DE DADOS ---
-
-        // Dados para Gráfico de Status
-        $statusData = $faturaModel->getStatusDistribution() ?? [];
-        $statusLabels = [];
-        $statusSeries = [];
-        foreach ($statusData as $status) {
-            $statusLabels[] = $status['status'];
-            $statusSeries[] = (int)$status['count'];
-        }
-
-        // Dados para Gráfico Comparativo
-        $labels = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $labels[] = date("Y-m", strtotime("-$i months"));
-        }
-        $revenueSeries = array_fill_keys($labels, 0);
-        $billedSeries = array_fill_keys($labels, 0);
-        $clientSeries = array_fill_keys($labels, 0);
-
-        $monthlyRevenueData = $faturaModel->getMonthlyRevenue() ?? [];
-        $monthlyBilledData = $faturaModel->getMonthlyBilled() ?? [];
-        $newClientsData = $clienteModel->getNewClientsPerMonth() ?? [];
-        
-        foreach ($monthlyRevenueData as $row) {
-            if (isset($revenueSeries[$row['mes']])) { $revenueSeries[$row['mes']] = (float)$row['total']; }
-        }
-        foreach ($monthlyBilledData as $row) {
-            if (isset($billedSeries[$row['mes']])) { $billedSeries[$row['mes']] = (float)$row['total']; }
-        }
-        foreach ($newClientsData as $row) {
-            if (isset($clientSeries[$row['mes']])) { $clientSeries[$row['mes']] = (int)$row['count']; }
-        }
-        
-        $chartLabels = array_map(fn($mes) => date('M/Y', strtotime($mes)), $labels);
-
-        // Montagem final do array de dados
+        // Monta o array de dados para a View, chamando os "ajudantes" privados
         $data = [
-            'email'          => $this->usuarioData['email'],
-            'title'          => 'Dashboard Principal',
-            'stats'          => $faturaModel->getDashboardStatistics(),
-            'statusLabels'   => json_encode($statusLabels),
-            'statusSeries'   => json_encode($statusSeries),
-            'clientLabels'   => json_encode($chartLabels), // Usando o label de meses unificado
-            'clientSeries'   => json_encode(array_values($clientSeries)),
-            'revenueLabels'  => json_encode($chartLabels), // Usando o label de meses unificado
-            'billedSeries'   => json_encode(array_values($billedSeries)),
-            'revenueSeries'  => json_encode(array_values($revenueSeries)),
-
-             'chartLabels'    => json_encode($chartLabels),
+            'email'           => $this->usuarioData['email'],
+            'title'           => 'Dashboard Principal',
+            'statusChart'     => $this->_prepareStatusChartData(),
+            'clientesChart'   => $this->_prepareNewClientsChartData(),
+            'comparisonChart' => $this->_prepareComparisonChartData(),
         ];
 
         return view('painel/dashboard/index', $data);
     }
+
+    // --- MÉTODOS PRIVADOS - OS "SEGREDOS DO CHEF" ---
+
+    /**
+     * Prepara os dados para o gráfico de Donut (Distribuição de Status).
+     */
+    private function _prepareStatusChartData(): array
+    {
+        $statusData = $this->faturaModel->getStatusDistribution() ?? [];
+        $labels = [];
+        $series = [];
+        foreach ($statusData as $status) {
+            $labels[] = $status['status'];
+            $series[] = (int)$status['count'];
+        }
+        return [
+            'labels' => json_encode($labels),
+            'series' => json_encode($series),
+        ];
+    }
+
+    /**
+     * Prepara os dados para o gráfico de Novos Clientes (Gráfico de Área).
+     */
+    private function _prepareNewClientsChartData(): array
+    {
+        $labels = [];
+        for ($i = 5; $i >= 0; $i--) { $labels[] = date("Y-m", strtotime("-$i months")); }
+        
+        $clientSeries = array_fill_keys($labels, 0);
+        $newClientsData = $this->clienteModel->getNewClientsPerMonth() ?? [];
+        foreach ($newClientsData as $row) {
+            if (isset($clientSeries[$row['mes']])) {
+                $clientSeries[$row['mes']] = (int)$row['count'];
+            }
+        }
+        
+        $chartLabels = array_map(fn($mes) => date('M/Y', strtotime($mes)), $labels);
+        
+        return [
+            'categories' => json_encode($chartLabels),
+            'series'     => json_encode(array_values($clientSeries)),
+        ];
+    }
     
-    // Todos os outros métodos (faturas, clientes, perfil, etc.) foram movidos para seus controllers
-    // Se ainda estiverem aqui, apague-os. O DashboardController deve ter apenas o index() e o __construct().
-    // Vou deixá-los aqui por enquanto, caso você não tenha criado os outros controllers.
-    
-    // --- MÉTODOS DE PERFIL ---
+    /**
+     * Prepara os dados para o gráfico Comparativo Mensal (Gráfico de Colunas).
+     */
+    private function _prepareComparisonChartData(): array
+    {
+        $labels = [];
+        for ($i = 5; $i >= 0; $i--) { $labels[] = date("Y-m", strtotime("-$i months")); }
+
+        $revenueSeries = array_fill_keys($labels, 0);
+        $billedSeries = array_fill_keys($labels, 0);
+        $clientSeries = array_fill_keys($labels, 0);
+
+        $monthlyRevenueData = $this->faturaModel->getMonthlyRevenue() ?? [];
+        $monthlyBilledData = $this->faturaModel->getMonthlyBilled() ?? [];
+        $newClientsData = $this->clienteModel->getNewClientsPerMonth() ?? [];
+        
+        foreach ($monthlyRevenueData as $row) { if (isset($revenueSeries[$row['mes']])) { $revenueSeries[$row['mes']] = (float)$row['total']; }}
+        foreach ($monthlyBilledData as $row) { if (isset($billedSeries[$row['mes']])) { $billedSeries[$row['mes']] = (float)$row['total']; }}
+        foreach ($newClientsData as $row) { if (isset($clientSeries[$row['mes']])) { $clientSeries[$row['mes']] = (int)$row['count']; }}
+        
+        $chartLabels = array_map(fn($mes) => date('M/Y', strtotime($mes)), $labels);
+
+        return [
+            'labels'    => json_encode($chartLabels),
+            'revenue'  => json_encode(array_values($revenueSeries)),
+            'billed'   => json_encode(array_values($billedSeries)),
+            'clients'   => json_encode(array_values($clientSeries)),
+        ];
+    }
+
+    // O método de perfil continua o mesmo
     public function perfil()
     {
         $data = ['title' => 'Meu Perfil'];
