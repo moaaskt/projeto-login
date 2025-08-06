@@ -10,10 +10,42 @@
         <button class="btn btn-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
             <i class="fas fa-filter me-2"></i>Filtrar
         </button>
+
+        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="fas fa-file-import me-2"></i>Importar Clientes
+        </button>
+
         <a href="<?= base_url('dashboard/clientes/novo') ?>" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Novo Cliente</a>
     </div>
 </div>
 
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Importar Clientes via Planilha</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="<?= base_url('dashboard/clientes/importar') ?>" method="post" enctype="multipart/form-data">
+                <?= csrf_field() ?> <div class="modal-body">
+                    <p>Selecione um arquivo Excel (.xlsx) para importar. O arquivo deve ter os cabeçalhos na primeira linha, exatamente nesta ordem:</p>
+                    <p class="text-info"><small><code>nome_completo, cpf_cnpj, email, telefone, endereco, cep, data_nascimento</code></small></p>
+                    <p class="text-warning"><small><strong>Atenção:</strong> Linhas com CPF/CNPJ ou Email que já existam no sistema serão ignoradas.</small></p>
+                    <div class="mb-3">
+                        <label for="excel_file" class="form-label">Arquivo (.xlsx)</label>
+                        <input class="form-control" type="file" name="excel_file" id="excel_file" required accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>Enviar e Importar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
 <?php endif; ?>
@@ -53,31 +85,34 @@
                     <?php endif; ?>
                 </tbody>
             </table>
-        </div><div class="mt-4">
-           <?= $pager->links('default', 'bootstrap_pagination') ?>
         </div>
-        
-    </div></div><div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasFiltersLabel"><i class="fas fa-filter me-2"></i>Filtros de Pesquisa</h5>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <form action="<?= base_url('dashboard/clientes') ?>" method="get">
-        <div class="mb-3">
-            <label for="termo" class="form-label">Nome, Email, CPF ou Telefone</label>
-            <input type="text" class="form-control" name="termo" id="termo" placeholder="Digite para buscar..." value="<?= esc($filters['termo'] ?? '') ?>">
+        <div class="mt-4">
+            <?= $pager->links('default', 'bootstrap_pagination') ?>
         </div>
-        <div class="mb-3">
-            <label for="data_cadastro" class="form-label">Data de Cadastro</label>
-            <input type="date" class="form-control" name="data_cadastro" id="data_cadastro" value="<?= esc($filters['data_cadastro'] ?? '') ?>">
-        </div>
-        <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-success">Aplicar Filtros</button>
-            <a href="<?= base_url('dashboard/clientes') ?>" class="btn btn-light">Limpar Filtros</a>
-        </div>
-    </form>
-  </div>
+
+    </div>
+</div>
+<div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel"><i class="fas fa-filter me-2"></i>Filtros de Pesquisa</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form action="<?= base_url('dashboard/clientes') ?>" method="get">
+            <div class="mb-3">
+                <label for="termo" class="form-label">Nome, Email, CPF ou Telefone</label>
+                <input type="text" class="form-control" name="termo" id="termo" placeholder="Digite para buscar..." value="<?= esc($filters['termo'] ?? '') ?>">
+            </div>
+            <div class="mb-3">
+                <label for="data_cadastro" class="form-label">Data de Cadastro</label>
+                <input type="date" class="form-control" name="data_cadastro" id="data_cadastro" value="<?= esc($filters['data_cadastro'] ?? '') ?>">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-success">Aplicar Filtros</button>
+                <a href="<?= base_url('dashboard/clientes') ?>" class="btn btn-light">Limpar Filtros</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 

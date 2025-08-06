@@ -7,6 +7,7 @@ use App\Models\ClienteModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 class ClientesController extends BaseController
 {
@@ -61,21 +62,37 @@ class ClientesController extends BaseController
      */
     public function salvar()
     {
-        // 1. Define as regras de validação
+        $clienteModel = new ClienteModel();
+        $dados = $this->request->getPost();
+        $id = $dados['id'] ?? null;
+
         $regras = [
             'nome_completo' => 'required|min_length[3]',
-            'email'         => "permit_empty|valid_email|is_unique[clientes.email,id,{$this->request->getPost('id')}]",
-            'cpf_cnpj'      => "permit_empty|is_unique[clientes.cpf_cnpj,id,{$this->request->getPost('id')}]"
+            'email'         => "permit_empty|valid_email|is_unique[clientes.email,id,{$id}]",
+            'cpf_cnpj'      => "permit_empty|is_unique[clientes.cpf_cnpj,id,{$id}]"
         ];
 
-        // 2. Executa a validação
         if (!$this->validate($regras)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // 3. Se a validação passar, continua para salvar
-        $clienteModel = new ClienteModel();
-        $dados = $this->request->getPost();
+        if (empty($id)) {
+            $email = $dados['email'] ?? null;
+            $cpf = $dados['cpf_cnpj'] ?? null;
+
+            $clienteExistente = $clienteModel->withDeleted()
+                ->groupStart()
+                ->where('email', $email)
+                ->orWhere('cpf_cnpj', $cpf)
+                ->groupEnd()
+                ->first();
+
+            if ($clienteExistente) {
+                $dados['id'] = $clienteExistente['id'];
+                // A instrução para reativar o cliente
+                $dados['deleted_at'] = null;
+            }
+        }
 
         if ($clienteModel->save($dados)) {
             return redirect()->to(base_url('dashboard/clientes'))->with('success', 'Cliente salvo com sucesso!');
@@ -93,6 +110,72 @@ class ClientesController extends BaseController
             return redirect()->to(base_url('dashboard/clientes'))->with('success', 'Cliente excluído com sucesso!');
         } else {
             return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Ocorreu um erro ao excluir o cliente.');
+        }
+    }
+
+
+     public function importar()
+    {
+        $file = $this->request->getFile('excel_file');
+        $clienteModel = new ClienteModel();
+
+        if ($file === null || !$file->isValid() || $file->getExtension() !== 'xlsx') {
+            return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Arquivo inválido. Apenas .xlsx são permitidos.');
+        }
+
+        try {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+            $spreadsheet = $reader->load($file->getTempName());
+            $sheet = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+            $clientesParaInserir = [];
+            $clientesParaAtualizar = [];
+            $countSucesso = 0;
+            $countAtualizado = 0;
+            $countFalha = 0;
+            
+            $isHeader = true;
+            foreach ($sheet as $row) {
+                if ($isHeader) { $isHeader = false; continue; }
+
+                $clienteData = [
+                    'nome_completo'   => $row['A'] ?? null,
+                    'cpf_cnpj'        => $row['B'] ?? null,
+                    'email'           => $row['C'] ?? null,
+                ];
+
+                if (empty($clienteData['nome_completo'])) {
+                    $countFalha++; continue;
+                }
+
+                $clienteExistente = $clienteModel->withDeleted()
+                                                 ->where('email', $clienteData['email'])
+                                                 ->orWhere('cpf_cnpj', $clienteData['cpf_cnpj'])
+                                                 ->first();
+
+                if ($clienteExistente) {
+                    $clienteData['id'] = $clienteExistente['id'];
+                    $clienteData['deleted_at'] = null; // A instrução para reativar
+                    $clientesParaAtualizar[] = $clienteData;
+                    $countAtualizado++;
+                } else {
+                    $clientesParaInserir[] = $clienteData;
+                    $countSucesso++;
+                }
+            }
+
+            if (!empty($clientesParaAtualizar)) {
+                $clienteModel->updateBatch($clientesParaAtualizar, 'id');
+            }
+            if (!empty($clientesParaInserir)) {
+                $clienteModel->insertBatch($clientesParaInserir);
+            }
+
+            return redirect()->to(base_url('dashboard/clientes'))
+                             ->with('success', "$countSucesso clientes novos importados, $countAtualizado clientes reativados/atualizados. $countFalha linhas ignoradas.");
+
+        } catch (\Exception $e) {
+            return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Ocorreu um erro ao processar o arquivo: ' . $e->getMessage());
         }
     }
 

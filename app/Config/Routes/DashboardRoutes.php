@@ -10,6 +10,7 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     $routes->get('clientes/visualizar/(:num)', 'painel\ClientesController::visualizar/$1');
     $routes->get('clientes/pdf/(:num)', 'painel\ClientesController::gerarPdf/$1');
     $routes->get('clientes/editar/(:num)', 'painel\ClientesController::editar/$1');
+    $routes->post('clientes/importar', 'painel\ClientesController::importar'); 
     $routes->post('clientes/salvar', 'painel\ClientesController::salvar');
     $routes->get('clientes/excluir/(:num)', 'painel\ClientesController::excluir/$1');
 
@@ -24,8 +25,4 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
 
     // Rota de Perfil
     $routes->get('perfil', 'painel\dashboard\Dashboard::perfil');
-
-
-
-    
 });
