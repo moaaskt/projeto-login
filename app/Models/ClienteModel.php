@@ -18,15 +18,19 @@ class ClienteModel extends Model
         'cpf_cnpj',
         'email',
         'telefone',
-        'logradouro', 
-        'numero',     
-        'bairro',     
-        'cidade',     
-        'estado',     
+        'logradouro',
+        'numero',
+        'bairro',
+        'cidade',
+        'estado',
         'cep',
         'data_nascimento',
         'deleted_at',
     ];
+
+    protected $beforeInsert = ['_cleanData'];
+    protected $beforeUpdate = ['_cleanData'];
+
 
     // Dates
     protected $useTimestamps = true;
@@ -83,5 +87,31 @@ class ClienteModel extends Model
             ->groupBy("DATE_FORMAT(created_at, '%Y-%m')")
             ->orderBy("mes", "ASC")
             ->findAll();
+    }
+
+
+    protected function _cleanData(array $data): array
+    {
+        // Verifica se os dados que queremos limpar foram enviados
+        if (isset($data['data']['cpf_cnpj'])) {
+            // Remove tudo que não for número
+            $data['data']['cpf_cnpj'] = preg_replace('/\D/', '', $data['data']['cpf_cnpj']);
+        }
+        if (isset($data['data']['telefone'])) {
+            $data['data']['telefone'] = preg_replace('/\D/', '', $data['data']['telefone']);
+        }
+        if (isset($data['data']['cep'])) {
+            $data['data']['cep'] = preg_replace('/\D/', '', $data['data']['cep']);
+        }
+
+        // Converte a data do formato BR (dd/mm/aaaa) para o formato do banco (aaaa-mm-dd)
+        if (isset($data['data']['data_nascimento'])) {
+            $date = \DateTime::createFromFormat('d/m/Y', $data['data']['data_nascimento']);
+            if ($date) {
+                $data['data']['data_nascimento'] = $date->format('Y-m-d');
+            }
+        }
+
+        return $data;
     }
 }
