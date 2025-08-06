@@ -22,12 +22,11 @@ class Cadastro extends BaseController
      */
     public function store()
     {
-        // A sua lógica de validação continua EXATAMENTE a mesma.
-        // Ela é perfeita e não precisa ser alterada.
+        // 1. Validação (continua sendo responsabilidade do Controller)
         $regras = [
-            'nome'  => 'required|min_length[3]',
-            'email' => 'required|valid_email|is_unique[usuarios.email]',
-            'senha' => 'required|min_length[8]',
+            'nome'            => 'required|min_length[3]',
+            'email'           => 'required|valid_email|is_unique[usuarios.email]',
+            'senha'           => 'required|min_length[8]',
             'confirmar_senha' => 'required|matches[senha]'
         ];
 
@@ -35,22 +34,15 @@ class Cadastro extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // 2. Se a validação passar, a mágica acontece aqui.
-        // Criamos uma instância do nosso repositório.
+        // 2. Cria uma instância do Repositório
         $repo = new UserRepository();
-
-        // Pegamos todos os dados do formulário de uma vez.
         $dados = $this->request->getPost();
 
-        // 3. AQUI ESTÁ A GRANDE MUDANÇA:
-        // Chamamos nosso método 'criarUsuario'.
-        // Não precisamos mais nos preocupar em hashear a senha aqui.
-        // O repositório cuida disso para nós! O controller fica mais limpo.
+        // 3. Chama o método do repositório
+        // O controller não precisa mais saber como a senha é tratada.
         if ($repo->criarUsuario($dados)) {
-            // A sua lógica de redirecionamento de sucesso continua a mesma.
             return redirect()->to(base_url('/'))->with('success', 'Cadastro realizado com sucesso! Faça seu login.');
         } else {
-            // A sua lógica de redirecionamento de falha continua a mesma.
             return redirect()->back()->withInput()->with('error', 'Ocorreu uma falha ao realizar o cadastro.');
         }
     }

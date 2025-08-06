@@ -4,29 +4,49 @@ namespace App\Repositories;
 
 use App\Models\UsuarioModel;
 
-class UserRepository extends BaseRepository
+class UserRepository
 {
+    protected $usuarioModel;
+
     public function __construct()
     {
-        $this->model = new UsuarioModel();
+        // O repositório usa o Model para se comunicar com o banco
+        $this->usuarioModel = new UsuarioModel();
     }
 
     /**
-     * Este é um método específico de usuário, então ele permanece aqui.
+     * Cria um novo usuário, cuidando da lógica de negócio como o hash da senha.
+     *
+     * @param array $dados Dados vindos do formulário
+     * @return bool Retorna true se o usuário foi criado, false se não.
      */
-    public function getUsuarioPorEmail(string $email)
+    public function criarUsuario(array $dados): bool
     {
-        return $this->model->where('email', $email)->first();
+        // 1. Prepara os dados para salvar
+        $dadosParaSalvar = [
+            'nome'   => $dados['nome'],
+            'email'  => $dados['email'],
+            // 2. A lógica de negócio (hash da senha) agora vive aqui!
+            'senha'  => password_hash($dados['senha'], PASSWORD_DEFAULT),
+        ];
+
+        // 3. Usa o Model para inserir no banco
+        if ($this->usuarioModel->insert($dadosParaSalvar)) {
+            return true;
+        }
+
+        return false;
     }
 
+
     /**
-     * Sobrescrevemos o método 'create' da BaseRepository
-     * para adicionar a lógica de hash da senha, que é
-     * uma regra de negócio específica da criação de usuários.
+     * Busca um usuário pelo seu endereço de e-mail.
+     *
+     * @param string $email
+     * @return array|null Retorna os dados do usuário ou nulo se não encontrar.
      */
-    public function create(array $dados): int|string|false
+    public function getUsuarioPorEmail(string $email): ?array
     {
-        $dados['senha'] = password_hash($dados['senha'], PASSWORD_DEFAULT);
-        return parent::create($dados); // Chama o método 'create' original da BaseRepository
+        return $this->usuarioModel->where('email', $email)->first();
     }
 }

@@ -17,41 +17,32 @@ class Login extends BaseController
     }
 
     // A mágica acontece aqui no método auth()
-    public function auth()
+      public function auth()
     {
         $session = session();
-        // 2. TROCAMOS a criação do Model pela criação do Repository.
+        
+        // 1. Cria uma instância do Repositório
         $repo = new UserRepository();
 
-        // A captura dos dados do formulário continua igual.
+        // 2. Pega os dados do formulário
         $email = $this->request->getPost('email');
         $senha = $this->request->getPost('password');
 
-        // 3. AQUI ESTÁ A GRANDE MUDANÇA:
-        // Em vez de $model->where(...), usamos nosso método limpo do repositório.
-        // A responsabilidade de saber COMO buscar no banco foi para o Repository.
+        // 3. Usa o método do repositório para buscar o usuário
         $usuario = $repo->getUsuarioPorEmail($email);
 
-        // O resto do seu código, com toda a lógica de verificação de senha,
-        // criação de sessão e redirecionamentos, continua EXATAMENTE IGUAL,
-        // pois ele não se importa de onde a variável $usuario veio.
+        // 4. A lógica de verificação de senha e sessão continua a mesma
         if ($usuario && password_verify($senha, $usuario['senha'])) {
-            // Se a verificação for bem-sucedida...
+            unset($usuario['senha']); // Remove a senha por segurança
 
-            // Remove a senha do array antes de salvar na sessão por segurança
-            unset($usuario['senha']);
-
-            // Define os dados da sessão
             $sessionData = [
                 'usuario'   => $usuario,
                 'logged_in' => true,
             ];
             $session->set($sessionData);
 
-            // Redireciona para o dashboard
             return redirect()->to(base_url('/dashboard'));
         } else {
-            // Se o usuário não existe ou a senha está errada...
             $session->setFlashdata('msg', 'E-mail ou senha inválidos.');
             return redirect()->to(base_url('/'));
         }

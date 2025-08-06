@@ -59,13 +59,13 @@ class ClientesController extends BaseController
     /**
      * Processa o salvamento de um cliente.
      */
-      public function salvar()
+    public function salvar()
     {
         // 1. Define as regras de validação
         $regras = [
             'nome_completo' => 'required|min_length[3]',
-            'email'         => 'permit_empty|valid_email',
-            'cpf_cnpj'      => 'permit_empty|min_length[11]|max_length[18]'
+            'email'         => "permit_empty|valid_email|is_unique[clientes.email,id,{$this->request->getPost('id')}]",
+            'cpf_cnpj'      => "permit_empty|is_unique[clientes.cpf_cnpj,id,{$this->request->getPost('id')}]"
         ];
 
         // 2. Executa a validação
