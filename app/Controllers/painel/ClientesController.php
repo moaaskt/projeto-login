@@ -9,6 +9,8 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use chillerlan\QRCode\{QRCode, QROptions};
+
 
 class ClientesController extends BaseController
 {
@@ -254,19 +256,44 @@ class ClientesController extends BaseController
     /**
      * Exibe a página de detalhes de um cliente.
      */
-    public function visualizar($id)
+   public function visualizar($id)
     {
         $clienteModel = new ClienteModel();
         $cliente = $clienteModel->find($id);
 
-        // Boa prática: se o cliente não for encontrado, mostra uma página de erro 404
         if ($cliente === null) {
-            throw new PageNotFoundException('Não foi possível encontrar o cliente com ID: ' . $id);
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Não foi possível encontrar o cliente com ID: ' . $id);
         }
 
+        // --- INÍCIO DA LÓGICA DO QR CODE ---
+
+        // 1. Monta o texto no formato vCard com os dados do cliente.
+        // É um formato padrão que todos os celulares entendem.
+        $vcard = "BEGIN:VCARD\n";
+        $vcard .= "VERSION:3.0\n";
+        $vcard .= "FN:" . esc($cliente['nome_completo']) . "\n"; // FN = Full Name
+        $vcard .= "TEL;TYPE=CELL:" . esc($cliente['telefone']) . "\n"; // TEL = Telefone
+        $vcard .= "EMAIL:" . esc($cliente['email']) . "\n"; // EMAIL
+        $vcard .= "END:VCARD";
+
+        // 2. Configura a biblioteca de QR Code
+        $options = new QROptions([
+            'outputType' => QRCode::OUTPUT_IMAGE_PNG,
+            'eccLevel'   => QRCode::ECC_L,
+            'scale'      => 5,
+        ]);
+
+        // 3. Gera a imagem do QR Code como uma Data URI
+        // Isso nos permite embutir a imagem diretamente no HTML, sem precisar salvar um arquivo no servidor.
+        // É uma técnica limpa e eficiente.
+        $qrCodeDataUri = (new QRCode($options))->render($vcard);
+
+        // --- FIM DA LÓGICA DO QR CODE ---
+
         $data = [
-            'cliente' => $cliente,
-            'title'   => 'Detalhes do Cliente'
+            'cliente'       => $cliente,
+            'title'         => 'Detalhes do Cliente',
+            'qrCodeDataUri' => $qrCodeDataUri, // 4. Envia o QR Code para a View
         ];
 
         return view('painel/clientes/visualizar', $data);
