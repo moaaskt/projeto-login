@@ -287,9 +287,22 @@ class ClientesController extends BaseController
         if ($cliente === null) {
             throw new PageNotFoundException('Não foi possível encontrar o cliente com ID: ' . $id);
         }
-
-        // Preparando o HTML que será convertido em PDF
+        
         $dataCadastro = date('d/m/Y H:i', strtotime($cliente['created_at']));
+
+        // --- AQUI ESTÁ A CORREÇÃO ---
+        // Construindo o endereço completo a partir das novas colunas
+        $enderecoCompleto = esc($cliente['logradouro'] ?: 'Não informado');
+        if (!empty($cliente['numero'])) {
+            $enderecoCompleto .= ', ' . esc($cliente['numero']);
+        }
+        if (!empty($cliente['bairro'])) {
+            $enderecoCompleto .= ' - ' . esc($cliente['bairro']);
+        }
+        $cidadeEstado = esc($cliente['cidade'] ?: 'Não informada') . ' - ' . esc($cliente['estado'] ?: 'NI');
+
+        
+        // Preparando o HTML que será convertido em PDF
         $html = "
             <style>
                 body { font-family: sans-serif; font-size: 12px; }
@@ -315,7 +328,8 @@ class ClientesController extends BaseController
 
             <h3>Endereço</h3>
             <dl>
-                <dt>Endereço Completo:</dt><dd>" . esc($cliente['endereco'] ?: 'Não informado') . "</dd>
+                <dt>Endereço Completo:</dt><dd>" . $enderecoCompleto . "</dd>
+                <dt>Cidade/UF:</dt><dd>" . $cidadeEstado . "</dd>
                 <dt>CEP:</dt><dd>" . esc($cliente['cep'] ?: 'Não informado') . "</dd>
             </dl>
         ";
@@ -323,7 +337,7 @@ class ClientesController extends BaseController
         // Configurações do Dompdf
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true);
+        $options->set('isRemoteEnabled', true); 
 
         // Instancia o Dompdf
         $dompdf = new Dompdf($options);

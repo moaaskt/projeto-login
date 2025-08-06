@@ -45,9 +45,22 @@
             </div>
         </div>
         <hr>
+        
         <h5>Endereço</h5>
-        <p><?= esc($cliente['endereco'] ?: 'Endereço não informado') ?></p>
-        <p><strong>CEP:</strong> <?= esc($cliente['cep'] ?: 'Não informado') ?></p>
+        <dl class="row">
+            <dt class="col-sm-2">Logradouro</dt>
+            <dd class="col-sm-10"><?= esc($cliente['logradouro'] ?: 'Não informado') ?>, <?= esc($cliente['numero'] ?: 's/n') ?></dd>
+            
+            <dt class="col-sm-2">Bairro</dt>
+            <dd class="col-sm-10"><?= esc($cliente['bairro'] ?: 'Não informado') ?></dd>
+
+            <dt class="col-sm-2">Cidade/UF</dt>
+            <dd class="col-sm-10"><?= esc($cliente['cidade'] ?: 'Não informada') ?> - <?= esc($cliente['estado'] ?: 'NI') ?></dd>
+
+            <dt class="col-sm-2">CEP</dt>
+            <dd class="col-sm-10"><?= esc($cliente['cep'] ?: 'Não informado') ?></dd>
+        </dl>
+
     </div>
 </div>
 
