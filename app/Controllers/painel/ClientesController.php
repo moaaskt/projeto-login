@@ -7,7 +7,8 @@ use App\Models\ClienteModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ClientesController extends BaseController
 {
@@ -114,13 +115,13 @@ class ClientesController extends BaseController
     }
 
 
-     public function importar()
+    public function importar()
     {
         $file = $this->request->getFile('excel_file');
         $clienteModel = new ClienteModel();
 
         if ($file === null || !$file->isValid() || $file->getExtension() !== 'xlsx') {
-            return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Arquivo inválido. Apenas .xlsx são permitidos.');
+            return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Arquivo inválido ou não selecionado. Apenas arquivos .xlsx são permitidos.');
         }
 
         try {
@@ -135,35 +136,52 @@ class ClientesController extends BaseController
             $countFalha = 0;
             
             $isHeader = true;
-            foreach ($sheet as $row) {
-                if ($isHeader) { $isHeader = false; continue; }
+            foreach ($sheet as $rowIndex => $row) {
+                if ($isHeader) {
+                    $isHeader = false;
+                    continue;
+                }
 
+                // MAPEAMENTO COMPLETO DE TODAS AS COLUNAS
                 $clienteData = [
                     'nome_completo'   => $row['A'] ?? null,
                     'cpf_cnpj'        => $row['B'] ?? null,
                     'email'           => $row['C'] ?? null,
+                    'telefone'        => $row['D'] ?? null,
+                    'endereco'        => $row['E'] ?? null,
+                    'cep'             => $row['F'] ?? null,
+                    'data_nascimento' => $row['G'] ?? null,
                 ];
 
+                // Validação de dados essenciais
                 if (empty($clienteData['nome_completo'])) {
-                    $countFalha++; continue;
+                    $countFalha++;
+                    continue; // Pula linha se não tiver nome
                 }
 
-                $clienteExistente = $clienteModel->withDeleted()
-                                                 ->where('email', $clienteData['email'])
-                                                 ->orWhere('cpf_cnpj', $clienteData['cpf_cnpj'])
-                                                 ->first();
+                // Lógica para verificar se o cliente já existe (incluindo "lixeira")
+                $clienteExistente = null;
+                if (!empty($clienteData['email']) || !empty($clienteData['cpf_cnpj'])) {
+                    $clienteExistente = $clienteModel->withDeleted()
+                                                     ->where('email', $clienteData['email'])
+                                                     ->orWhere('cpf_cnpj', $clienteData['cpf_cnpj'])
+                                                     ->first();
+                }
 
                 if ($clienteExistente) {
+                    // Se existe, preparamos para atualizar/reativar
                     $clienteData['id'] = $clienteExistente['id'];
-                    $clienteData['deleted_at'] = null; // A instrução para reativar
+                    $clienteData['deleted_at'] = null; // Garante a reativação
                     $clientesParaAtualizar[] = $clienteData;
                     $countAtualizado++;
                 } else {
+                    // Se não existe, preparamos para inserir como novo
                     $clientesParaInserir[] = $clienteData;
                     $countSucesso++;
                 }
             }
 
+            // Executa as operações em lote
             if (!empty($clientesParaAtualizar)) {
                 $clienteModel->updateBatch($clientesParaAtualizar, 'id');
             }
@@ -172,12 +190,69 @@ class ClientesController extends BaseController
             }
 
             return redirect()->to(base_url('dashboard/clientes'))
-                             ->with('success', "$countSucesso clientes novos importados, $countAtualizado clientes reativados/atualizados. $countFalha linhas ignoradas.");
+                             ->with('success', "$countSucesso clientes novos importados, $countAtualizado clientes reativados/atualizados. $countFalha linhas foram ignoradas.");
 
         } catch (\Exception $e) {
             return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Ocorreu um erro ao processar o arquivo: ' . $e->getMessage());
         }
     }
+
+
+    // Em app/Controllers/painel/ClientesController.php
+
+    /**
+     * Gera e força o download de uma planilha Excel de modelo para importação de clientes.
+     */
+    public function gerarModeloExcel()
+    {
+        // 1. Cria um novo objeto de planilha
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Modelo de Importação');
+
+        // 2. Define os cabeçalhos que o usuário deve preencher
+        $headers = [
+            'nome_completo',
+            'cpf_cnpj',
+            'email',
+            'telefone',
+            'endereco',
+            'cep',
+            'data_nascimento (formato AAAA-MM-DD)',
+        ];
+        $sheet->fromArray($headers, null, 'A1');
+
+        // 3. (Bônus de Especialista) Adiciona estilo para ficar profissional
+        $headerStyle = $sheet->getStyle('A1:G1');
+        $headerStyle->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE));
+        $headerStyle->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('4F46E5');
+
+        // Ajusta a largura das colunas automaticamente
+        foreach (range('A', 'G') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // 4. Cria o "escritor" e define o nome do arquivo
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'modelo_importacao_clientes.xlsx';
+
+        // 5. Define os cabeçalhos HTTP para forçar o download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+
+        // 6. Envia o arquivo para o navegador
+        $writer->save('php://output');
+        exit();
+    }
+
+
+
+
+
+
+
+
 
 
     /**

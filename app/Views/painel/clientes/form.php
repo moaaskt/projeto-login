@@ -29,7 +29,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="cpf_cnpj" class="form-label">CPF / CNPJ</label>
-                    <input type="text" class="form-control" id="cpf_cnpj" name="cpf_cnpj" value="<?= isset($cliente) ? esc($cliente['cpf_cnpj']) : '' ?>">
+                    <input type="text" class="form-control" id="cpf_cnpj" name="cpf_cnpj"  value="<?= isset($cliente) ? esc($cliente['cpf_cnpj']) : '' ?>">
                 </div>
             </div>
 

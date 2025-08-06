@@ -19,20 +19,27 @@
     </div>
 </div>
 
-<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+<div class="modal fade" id="importModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-white">
             <div class="modal-header">
-                <h5 class="modal-title" id="importModalLabel">Importar Clientes via Planilha</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Importar Clientes via Planilha</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form action="<?= base_url('dashboard/clientes/importar') ?>" method="post" enctype="multipart/form-data">
-                <?= csrf_field() ?> <div class="modal-body">
-                    <p>Selecione um arquivo Excel (.xlsx) para importar. O arquivo deve ter os cabeçalhos na primeira linha, exatamente nesta ordem:</p>
-                    <p class="text-info"><small><code>nome_completo, cpf_cnpj, email, telefone, endereco, cep, data_nascimento</code></small></p>
+                <?= csrf_field() ?>
+                <div class="modal-body">
+                    <p>Para importar, primeiro baixe nosso modelo, preencha com os dados dos seus clientes e depois faça o upload do arquivo.</p>
+                    
+                    <div class="text-center mb-3">
+                        <a href="<?= base_url('dashboard/clientes/modelo-excel') ?>" class="btn btn-outline-info">
+                            <i class="fas fa-download me-2"></i>Baixar Modelo da Planilha
+                        </a>
+                    </div>
+                    
                     <p class="text-warning"><small><strong>Atenção:</strong> Linhas com CPF/CNPJ ou Email que já existam no sistema serão ignoradas.</small></p>
                     <div class="mb-3">
-                        <label for="excel_file" class="form-label">Arquivo (.xlsx)</label>
+                        <label for="excel_file" class="form-label">Selecione o arquivo .xlsx preenchido:</label>
                         <input class="form-control" type="file" name="excel_file" id="excel_file" required accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                     </div>
                 </div>

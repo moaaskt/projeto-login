@@ -23,6 +23,10 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     $routes->post('faturas/salvar', 'painel\FaturasController::salvar');
     $routes->get('faturas/excluir/(:num)', 'painel\FaturasController::excluir/$1');
 
+
+     // ROTA NOVA PARA O DOWNLOAD DO MODELO EXCEL
+    $routes->get('clientes/modelo-excel', 'painel\ClientesController::gerarModeloExcel');
+
     // Rota de Perfil
     $routes->get('perfil', 'painel\dashboard\Dashboard::perfil');
 });
