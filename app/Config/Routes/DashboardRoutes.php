@@ -4,17 +4,18 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     // Rota principal do painel
     $routes->get('', 'painel\dashboard\Dashboard::index');
 
-    // Rotas de Clientes
+    // --- ROTAS DE CLIENTES ---
     $routes->get('clientes', 'painel\ClientesController::index');
     $routes->get('clientes/novo', 'painel\ClientesController::novo');
     $routes->get('clientes/visualizar/(:num)', 'painel\ClientesController::visualizar/$1');
     $routes->get('clientes/pdf/(:num)', 'painel\ClientesController::gerarPdf/$1');
+    $routes->get('clientes/modelo-excel', 'painel\ClientesController::gerarModeloExcel');
     $routes->get('clientes/editar/(:num)', 'painel\ClientesController::editar/$1');
-    $routes->post('clientes/importar', 'painel\ClientesController::importar'); 
+    $routes->post('clientes/importar', 'painel\ClientesController::importar');
     $routes->post('clientes/salvar', 'painel\ClientesController::salvar');
     $routes->get('clientes/excluir/(:num)', 'painel\ClientesController::excluir/$1');
 
-    // --- ROTAS DE FATURAS (AGORA APONTAM PARA O NOVO CONTROLLER) ---
+    // --- ROTAS DE FATURAS ---
     $routes->get('faturas', 'painel\FaturasController::index');
     $routes->get('faturas/nova', 'painel\FaturasController::nova');
     $routes->get('faturas/visualizar/(:num)', 'painel\FaturasController::visualizar/$1');
@@ -23,10 +24,8 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     $routes->post('faturas/salvar', 'painel\FaturasController::salvar');
     $routes->get('faturas/excluir/(:num)', 'painel\FaturasController::excluir/$1');
 
-
-     // ROTA NOVA PARA O DOWNLOAD DO MODELO EXCEL
-    $routes->get('clientes/modelo-excel', 'painel\ClientesController::gerarModeloExcel');
-
-    // Rota de Perfil
-    $routes->get('perfil', 'painel\dashboard\Dashboard::perfil');
+    // --- ROTAS DE PERFIL (CORRIGIDAS) ---
+    $routes->get('perfil', 'painel\PerfilController::index');
+    $routes->post('perfil/atualizar-dados', 'painel\PerfilController::atualizarDados');
+    $routes->post('perfil/alterar-senha', 'painel\PerfilController::alterarSenha');
 });

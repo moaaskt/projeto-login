@@ -120,9 +120,5 @@ class Dashboard extends BaseController
     }
 
     // O método de perfil continua o mesmo
-    public function perfil()
-    {
-        $data = ['title' => 'Meu Perfil'];
-        return view('painel/perfil/index', $data);
-    }
+
 }
