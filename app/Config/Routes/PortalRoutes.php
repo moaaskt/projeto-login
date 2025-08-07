@@ -1,7 +1,13 @@
 <?php
-// Rotas do Portal do Cliente, protegidas pelo filtro 'cliente'
+
+// Rotas exclusivas para o cliente logado
 $routes->group('portal', ['filter' => 'cliente'], function ($routes) {
-    $routes->get('', 'painel\PortalController::index'); // Dashboard do cliente
-    $routes->get('faturas', 'painel\PortalController::faturas'); // Lista de faturas do cliente
-    $routes->get('perfil', 'painel\PerfilController::index'); // Reutilizamos o PerfilController
+    // AINDA VAMOS CRIAR ESTE CONTROLLER
+    $routes->get('', 'Portal\DashboardController::index'); 
+    
+    // --- ROTAS DE FATURAS DO CLIENTE ---
+    // AINDA VAMOS CRIAR ESTE CONTROLLER
+    $routes->get('faturas', 'Portal\FaturasController::index');
+    $routes->get('faturas/visualizar/(:num)', 'Portal\FaturasController::visualizar/$1');
+    $routes->get('faturas/pagar/(:num)', 'Portal\FaturasController::pagar/$1');
 });
