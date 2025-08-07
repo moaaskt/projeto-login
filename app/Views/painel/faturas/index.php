@@ -197,7 +197,51 @@
 </div>
 
 <div class="offcanvas offcanvas-end bg-dark text-white" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasFiltersLabel">Filtros de Faturas</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="get" action="<?= base_url('dashboard/faturas') ?>">
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="Pendente" <?= $filters['status'] == 'Pendente' ? 'selected' : '' ?>>Pendente</option>
+                    <option value="Paga" <?= $filters['status'] == 'Paga' ? 'selected' : '' ?>>Paga</option>
+                    <option value="Vencida" <?= $filters['status'] == 'Vencida' ? 'selected' : '' ?>>Vencida</option>
+                    <option value="Cancelada" <?= $filters['status'] == 'Cancelada' ? 'selected' : '' ?>>Cancelada</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="valor_min" class="form-label">Valor Mínimo</label>
+                <input type="number" name="valor_min" id="valor_min" class="form-control" step="0.01" value="<?= esc($filters['valor_min']) ?>">
+            </div>
+
+            <div class="mb-3">
+                <label for="valor_max" class="form-label">Valor Máximo</label>
+                <input type="number" name="valor_max" id="valor_max" class="form-control" step="0.01" value="<?= esc($filters['valor_max']) ?>">
+            </div>
+
+            <div class="mb-3">
+                <label for="data_inicio" class="form-label">Data de Início</label>
+                <input type="date" name="data_inicio" id="data_inicio" class="form-control" value="<?= esc($filters['data_inicio']) ?>">
+            </div>
+
+            <div class="mb-3">
+                <label for="data_fim" class="form-label">Data de Fim</label>
+                <input type="date" name="data_fim" id="data_fim" class="form-control" value="<?= esc($filters['data_fim']) ?>">
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+                <a href="<?= base_url('dashboard/faturas') ?>" class="btn btn-outline-light">Limpar</a>
+            </div>
+        </form>
+    </div>
 </div>
+
 
 <?php if (!empty($faturas)): ?>
     <?php foreach ($faturas as $fatura): ?>

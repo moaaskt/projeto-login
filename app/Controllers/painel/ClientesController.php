@@ -244,15 +244,6 @@ class ClientesController extends BaseController
         exit();
     }
 
-
-
-
-
-
-
-
-
-
     /**
      * Exibe a página de detalhes de um cliente.
      */

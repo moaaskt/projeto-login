@@ -35,4 +35,8 @@
     </div>
   </div>
 </div>
+
+
+
+ <script src="<?= base_url('js/dashboard.js') ?>"></script>
 <?= $this->endSection() ?>
