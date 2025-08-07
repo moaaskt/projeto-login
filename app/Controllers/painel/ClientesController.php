@@ -17,7 +17,7 @@ class ClientesController extends BaseController
     /**
      * Exibe a lista de clientes.
      */
-   public function index()
+    public function index()
     {
         $clienteModel = new ClienteModel();
 
@@ -69,44 +69,94 @@ class ClientesController extends BaseController
      */
     public function salvar()
     {
-        $clienteModel = new ClienteModel();
-        $dados = $this->request->getPost();
-        $id = $dados['id'] ?? null;
+        $clienteModel = new \App\Models\ClienteModel();
 
-        $regras = [
-            'nome_completo' => 'required|min_length[3]',
-            'email'         => "permit_empty|valid_email|is_unique[clientes.email,id,{$id}]",
-            'cpf_cnpj'      => "permit_empty|is_unique[clientes.cpf_cnpj,id,{$id}]"
-        ];
-
-        if (!$this->validate($regras)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        if (empty($id)) {
-            $email = $dados['email'] ?? null;
-            $cpf = $dados['cpf_cnpj'] ?? null;
-
-            $clienteExistente = $clienteModel->withDeleted()
-                ->groupStart()
-                ->where('email', $email)
-                ->orWhere('cpf_cnpj', $cpf)
-                ->groupEnd()
-                ->first();
-
-            if ($clienteExistente) {
-                $dados['id'] = $clienteExistente['id'];
-                // A instrução para reativar o cliente
-                $dados['deleted_at'] = null;
-            }
-        }
+        // Só pega os campos permitidos — mais seguro
+        $dados = $this->request->getPost([
+            'id',
+            'nome_completo',
+            'email',
+            'telefone',
+            'cpf',
+            // adicione os demais campos usados
+        ]);
+        // dd($dados);
 
         if ($clienteModel->save($dados)) {
-            return redirect()->to(base_url('dashboard/clientes'))->with('success', 'Cliente salvo com sucesso!');
+            $senhaTemporaria = null;
+
+            if ($this->request->getPost('criar_acesso') && empty($dados['id'])) {
+                $novoClienteId = $clienteModel->getInsertID();
+                $senhaTemporaria = $this->_criarAcessoPortal($novoClienteId, $dados);
+            }
+
+            $mensagem = 'Cliente salvo com sucesso!';
+            if ($senhaTemporaria) {
+                $mensagem .= " Acesso ao portal criado com a senha temporária: <strong>{$senhaTemporaria}</strong>. Por favor, informe o cliente.";
+            }
+
+            return redirect()->to(base_url('dashboard/clientes'))->with('success', $mensagem);
         } else {
             return redirect()->back()->withInput()->with('errors', $clienteModel->errors());
         }
     }
+
+
+    /**
+     * Cria um registro na tabela 'usuarios' e RETORNA a senha temporária.
+     * @return string A senha temporária gerada.
+     */
+    private function _criarAcessoPortal($clienteId, $dadosCliente): string
+    {
+        $usuarioModel = new \App\Models\UsuarioModel();
+
+        // Gera uma senha aleatória e segura para o primeiro acesso
+        $senhaTemporaria = bin2hex(random_bytes(4)); // 8 caracteres
+
+        $dadosUsuario = [
+            'cliente_id' => $clienteId,
+            'nome'       => $dadosCliente['nome_completo'],
+            'email'      => $dadosCliente['email'],
+            'senha'      => password_hash($senhaTemporaria, PASSWORD_DEFAULT),
+            'role'       => 'cliente',
+        ];
+
+        $usuarioModel->insert($dadosUsuario);
+
+        return $senhaTemporaria;
+    }
+
+
+    /**
+     * Verifica via AJAX se um e-mail já existe na tabela de usuários.
+     * Retorna uma resposta JSON.
+     */
+    public function checkEmail()
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(403, 'Acesso Negado');
+        }
+
+        $email = $this->request->getPost('email');
+        $idAtual = $this->request->getPost('id');
+
+        $clienteModel = new \App\Models\ClienteModel();
+
+        $query = $clienteModel->withDeleted()->where('email', $email);
+
+        if (!empty($idAtual)) {
+            $query->where('id !=', $idAtual);
+        }
+
+        $clienteExistente = $query->first();
+
+        return $this->response->setJSON(['exists' => ($clienteExistente !== null)]);
+    }
+
+
+
+
+
     /**
      * Exclui um cliente.
      */
@@ -121,7 +171,7 @@ class ClientesController extends BaseController
     }
 
 
-      public function importar()
+    public function importar()
     {
         $file = $this->request->getFile('excel_file');
         $clienteModel = new ClienteModel();
@@ -140,10 +190,13 @@ class ClientesController extends BaseController
             $countSucesso = 0;
             $countAtualizado = 0;
             $countFalha = 0;
-            
+
             $isHeader = true;
             foreach ($sheet as $row) {
-                if ($isHeader) { $isHeader = false; continue; }
+                if ($isHeader) {
+                    $isHeader = false;
+                    continue;
+                }
 
                 // MAPEAMENTO ATUALIZADO COM OS NOVOS CAMPOS DE ENDEREÇO
                 $clienteData = [
@@ -161,19 +214,20 @@ class ClientesController extends BaseController
                 ];
 
                 if (empty($clienteData['nome_completo'])) {
-                    $countFalha++; continue;
+                    $countFalha++;
+                    continue;
                 }
 
                 $clienteExistente = null;
                 if (!empty($clienteData['email']) || !empty($clienteData['cpf_cnpj'])) {
-                     $clienteExistente = $clienteModel->withDeleted()
-                                                 ->groupStart()
-                                                    ->where('email', $clienteData['email'])
-                                                    ->orWhere('cpf_cnpj', $clienteData['cpf_cnpj'])
-                                                 ->groupEnd()
-                                                 ->first();
+                    $clienteExistente = $clienteModel->withDeleted()
+                        ->groupStart()
+                        ->where('email', $clienteData['email'])
+                        ->orWhere('cpf_cnpj', $clienteData['cpf_cnpj'])
+                        ->groupEnd()
+                        ->first();
                 }
-               
+
                 if ($clienteExistente) {
                     $clienteData['id'] = $clienteExistente['id'];
                     $clienteData['deleted_at'] = null;
@@ -193,8 +247,7 @@ class ClientesController extends BaseController
             }
 
             return redirect()->to(base_url('dashboard/clientes'))
-                             ->with('success', "$countSucesso clientes novos importados, $countAtualizado clientes reativados/atualizados. $countFalha linhas ignoradas.");
-
+                ->with('success', "$countSucesso clientes novos importados, $countAtualizado clientes reativados/atualizados. $countFalha linhas ignoradas.");
         } catch (\Exception $e) {
             return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Ocorreu um erro ao processar o arquivo: ' . $e->getMessage());
         }
@@ -251,7 +304,7 @@ class ClientesController extends BaseController
     /**
      * Exibe a página de detalhes de um cliente.
      */
-   public function visualizar($id)
+    public function visualizar($id)
     {
         $clienteModel = new ClienteModel();
         $cliente = $clienteModel->find($id);
@@ -305,7 +358,7 @@ class ClientesController extends BaseController
         if ($cliente === null) {
             throw new PageNotFoundException('Não foi possível encontrar o cliente com ID: ' . $id);
         }
-        
+
         $dataCadastro = date('d/m/Y H:i', strtotime($cliente['created_at']));
 
         // --- AQUI ESTÁ A CORREÇÃO ---
@@ -319,7 +372,7 @@ class ClientesController extends BaseController
         }
         $cidadeEstado = esc($cliente['cidade'] ?: 'Não informada') . ' - ' . esc($cliente['estado'] ?: 'NI');
 
-        
+
         // Preparando o HTML que será convertido em PDF
         $html = "
             <style>
@@ -355,7 +408,7 @@ class ClientesController extends BaseController
         // Configurações do Dompdf
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true); 
+        $options->set('isRemoteEnabled', true);
 
         // Instancia o Dompdf
         $dompdf = new Dompdf($options);

@@ -112,7 +112,8 @@
     <script src="<?= base_url('js/masks.js') ?>"></script>
     <script src="<?= base_url('js/viacep.js') ?>"></script>
     <script src="<?= base_url('js/perfil.js') ?>"></script>
-
+    
+    <script src="<?= base_url('js/validation.js') ?>"></script>
     <?= $this->renderSection('pageScripts') ?>
 </body>
 

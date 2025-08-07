@@ -23,3 +23,7 @@ if (is_file(APPPATH . 'Config/Routes/Auth.php')) {
 if (is_file(APPPATH . 'Config/Routes/DashboardRoutes.php')) {
     require APPPATH . 'Config/Routes/DashboardRoutes.php';
 }
+// --- BLOCO PARA CARREGAR AS ROTAS DO PORTAL DO CLIENTE ---
+if (is_file(APPPATH . 'Config/Routes/PortalRoutes.php')) {
+    require APPPATH . 'Config/Routes/PortalRoutes.php';
+}

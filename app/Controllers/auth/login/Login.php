@@ -17,23 +17,18 @@ class Login extends BaseController
     }
 
     // A mágica acontece aqui no método auth()
-      public function auth()
+    public function auth()
     {
         $session = session();
-        
-        // 1. Cria uma instância do Repositório
-        $repo = new UserRepository();
+        $repo = new \App\Repositories\UserRepository();
 
-        // 2. Pega os dados do formulário
         $email = $this->request->getPost('email');
         $senha = $this->request->getPost('password');
 
-        // 3. Usa o método do repositório para buscar o usuário
         $usuario = $repo->getUsuarioPorEmail($email);
 
-        // 4. A lógica de verificação de senha e sessão continua a mesma
         if ($usuario && password_verify($senha, $usuario['senha'])) {
-            unset($usuario['senha']); // Remove a senha por segurança
+            unset($usuario['senha']);
 
             $sessionData = [
                 'usuario'   => $usuario,
@@ -41,13 +36,20 @@ class Login extends BaseController
             ];
             $session->set($sessionData);
 
-            return redirect()->to(base_url('/dashboard'));
+            // --- LÓGICA DE REDIRECIONAMENTO INTELIGENTE ---
+            if ($usuario['role'] === 'admin') {
+                return redirect()->to(base_url('/dashboard')); // Admin vai para o painel CRM
+            } else {
+                return redirect()->to(base_url('/portal')); // Cliente vai para seu portal
+            }
+            
         } else {
             $session->setFlashdata('msg', 'E-mail ou senha inválidos.');
             return redirect()->to(base_url('/'));
         }
     }
 
+    
     // O método logout() continua igual.
     public function logout()
     {

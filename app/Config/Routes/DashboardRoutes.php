@@ -1,6 +1,6 @@
 <?php
 
-$routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
+$routes->group('dashboard', ['filter' => 'admin'], function ($routes) {
     // Rota principal do painel
     $routes->get('', 'painel\dashboard\Dashboard::index');
 
@@ -14,6 +14,10 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     $routes->post('clientes/importar', 'painel\ClientesController::importar');
     $routes->post('clientes/salvar', 'painel\ClientesController::salvar');
     $routes->get('clientes/excluir/(:num)', 'painel\ClientesController::excluir/$1');
+    $routes->post('clientes/check-email', 'painel\ClientesController::checkEmail');
+    $routes->get('clientes/excluir/(:num)', 'painel\ClientesController::excluir/$1');
+
+    
 
     // --- ROTAS DE FATURAS ---
     $routes->get('faturas', 'painel\FaturasController::index');

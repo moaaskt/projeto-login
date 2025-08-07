@@ -85,7 +85,7 @@
     <main class="register-container">
         <div class="register-header">
             <img src="https://doardigital.com.br/wp-content/uploads/2022/11/Webp.net-resizeimage-1.png" alt="Logo Doar Digital">
-            <h1>Crie sua conta</h1>
+           <h1>Cadastro de Novo Usuário do Painel</h1>
         </div>
 
         <form action="<?= base_url('cadastro/salvar') ?>" method="post">
