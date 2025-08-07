@@ -17,27 +17,31 @@ class ClientesController extends BaseController
     /**
      * Exibe a lista de clientes.
      */
-    public function index()
+   public function index()
     {
         $clienteModel = new ClienteModel();
 
-        // Pega os filtros da URL (via GET)
+        // Coleta os filtros da query string
         $filters = [
-            'termo'         => $this->request->getGet('termo'),
-            'data_cadastro' => $this->request->getGet('data_cadastro')
+            'termo' => $this->request->getGet('termo'),
+            'data_cadastro' => $this->request->getGet('data_cadastro'),
         ];
 
-        $data = [
-            // Passa os filtros para o Model fazer a busca
-            'clientes' => $clienteModel->search($filters),
-            'pager'    => $clienteModel->pager,
-            'title'    => 'Meus Clientes',
-            'filters'  => $filters // Devolve os filtros para a View
-        ];
+        // Remove filtros vazios
+        $filters = array_filter($filters);
 
-        return view('painel/clientes/index', $data);
+        // Passa os filtros para o model e obtém os resultados paginados
+        $clientes = $clienteModel->search($filters);
+
+        // Pegamos o pager para usar na view
+        $pager = $clienteModel->pager;
+
+        return view('painel/clientes/index', [
+            'clientes' => $clientes,
+            'filters' => $filters,
+            'pager' => $pager
+        ]);
     }
-
     /**
      * Mostra o formulário para um novo cliente.
      */
