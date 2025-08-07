@@ -15,7 +15,9 @@ class FaturasController extends BaseController
         $faturaModel = new FaturaModel();
 
         // Pega o ID do cliente da sessão.
-        $clienteId = session()->get('cliente_id');
+        $clienteId = session()->get('usuario')['cliente_id'];
+
+
 
         $data = [
             'title'   => 'Minhas Faturas',
@@ -34,7 +36,7 @@ class FaturasController extends BaseController
     public function visualizar($id)
     {
         $faturaModel = new FaturaModel();
-        $clienteId = service('auth')->user()->cliente_id;
+        $clienteId = session()->get('usuario')['cliente_id'];
 
         // Busca a fatura
         $fatura = $faturaModel->find($id);
@@ -60,7 +62,7 @@ class FaturasController extends BaseController
     {
         // A mesma verificação de segurança é necessária aqui
         $faturaModel = new FaturaModel();
-        $clienteId = service('auth')->user()->cliente_id;
+        $clienteId = session()->get('usuario')['cliente_id'];
         $fatura = $faturaModel->find($id);
 
         if ($fatura === null || $fatura['cliente_id'] != $clienteId) {
