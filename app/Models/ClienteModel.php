@@ -15,8 +15,8 @@ class ClienteModel extends Model
 
     protected $allowedFields    = [
         'nome_completo',
-        'cpf_cnpj',
         'email',
+        'cpf_cnpj',
         'telefone',
         'logradouro',
         'numero',
@@ -24,13 +24,8 @@ class ClienteModel extends Model
         'cidade',
         'estado',
         'cep',
-        'data_nascimento',
-        'deleted_at',
+        'data_nascimento'
     ];
-
-    protected $beforeInsert = ['_cleanData'];
-    protected $beforeUpdate = ['_cleanData'];
-
 
     // Dates
     protected $useTimestamps = true;
@@ -39,11 +34,21 @@ class ClienteModel extends Model
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    // Validation (opcional)
-  
+    // Validation
+ 
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
+    // Callbacks
+    protected $allowCallbacks = true;
+    protected $beforeInsert   = [];
+    protected $afterInsert    = [];
+    protected $beforeUpdate   = [];
+    protected $afterUpdate    = [];
+    protected $beforeFind     = [];
+    protected $afterFind      = [];
+    protected $beforeDelete   = [];
+    protected $afterDelete    = [];
 
     /**
      * Busca clientes no banco de dados com base nos filtros.
@@ -80,11 +85,12 @@ class ClienteModel extends Model
     /**
      * Retorna a contagem de novos clientes por mês para um gráfico.
      */
-    public function getNewClientsPerMonth()
+     public function getNewClientsPerMonth(): array
     {
         return $this->select("COUNT(id) as count, DATE_FORMAT(created_at, '%Y-%m') as mes")
-            ->groupBy("DATE_FORMAT(created_at, '%Y-%m')")
-            ->orderBy("mes", "ASC")
+            ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-6 months')))
+            ->groupBy('mes')
+            ->orderBy('mes', 'ASC')
             ->findAll();
     }
 

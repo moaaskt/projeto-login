@@ -67,15 +67,44 @@ class FaturasController extends BaseController
     /**
      * Salva uma nova fatura ou atualiza uma existente.
      */
-    public function salvar()
+     public function salvar()
     {
-        $faturaModel = new FaturaModel();
-        $dados = $this->request->getPost();
+        // --- PASSO 1: CONTROLE TOTAL DOS DADOS ---
+        // Em vez de passar o $_POST diretamente, vamos construir o array de dados
+        // manualmente. Isso nos dá 100% de certeza sobre o que estamos enviando.
+        $dadosParaSalvar = [
+            'cliente_id'      => $this->request->getPost('cliente_id'),
+            'descricao'       => $this->request->getPost('descricao'),
+            'valor'           => $this->request->getPost('valor'),
+            'data_vencimento' => $this->request->getPost('data_vencimento'),
+            'status'          => $this->request->getPost('status'),
+        ];
 
-        if ($faturaModel->save($dados)) {
-            return redirect()->to(base_url('dashboard/faturas'))->with('success', 'Fatura salva com sucesso!');
-        } else {
-            return redirect()->back()->withInput()->with('errors', $faturaModel->errors());
+        // Se for uma edição, adicionamos o ID ao array.
+        $id = $this->request->getPost('id');
+        if (!empty($id)) {
+            $dadosParaSalvar['id'] = $id;
+        }
+
+        // --- PASSO 2: INSERÇÃO DIRETA E CAPTURA DE ERRO ---
+        // Vamos usar o Query Builder para inserir os dados diretamente,
+        // bypassando qualquer "mágica" do método save() que possa estar falhando.
+        // Isso nos dará um controle absoluto e um erro de banco de dados real se houver um.
+        $faturaModel = new FaturaModel();
+
+        try {
+            if ($faturaModel->insert($dadosParaSalvar)) {
+                // Se a inserção funcionou, redireciona com sucesso.
+                return redirect()->to(base_url('dashboard/faturas'))->with('success', 'Fatura salva com sucesso!');
+            } else {
+                // Se o insert() retornar false, mostramos os erros do model.
+                // Isso é nossa rede de segurança final.
+                dd($faturaModel->errors());
+            }
+        } catch (\Exception $e) {
+            // Se a tentativa de inserção gerar um erro do banco de dados (ex: tipo de dado errado),
+            // nós vamos capturá-lo e mostrá-lo na tela.
+            dd("Erro do Banco de Dados: " . $e->getMessage());
         }
     }
 
