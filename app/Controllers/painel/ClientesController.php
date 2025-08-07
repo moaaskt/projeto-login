@@ -77,8 +77,15 @@ class ClientesController extends BaseController
             'nome_completo',
             'email',
             'telefone',
-            'cpf',
-            // adicione os demais campos usados
+            'cpf_cnpj',
+            'cep',
+            'logradouro',
+            'numero',
+            'bairro',
+            'cidade',
+            'estado',
+            'data_nascimento',
+
         ]);
         // dd($dados);
 
@@ -143,6 +150,41 @@ class ClientesController extends BaseController
         $clienteModel = new \App\Models\ClienteModel();
 
         $query = $clienteModel->withDeleted()->where('email', $email);
+
+        if (!empty($idAtual)) {
+            $query->where('id !=', $idAtual);
+        }
+
+        $clienteExistente = $query->first();
+
+        return $this->response->setJSON(['exists' => ($clienteExistente !== null)]);
+    }
+
+
+    /**
+     * Verifica via AJAX se um CPF/CNPJ já existe na tabela de clientes.
+     * Retorna uma resposta JSON.
+     */
+    public function checkCpfCnpj()
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(403, 'Acesso Negado');
+        }
+
+        $cpfCnpj = $this->request->getPost('cpf_cnpj');
+        $idAtual = $this->request->getPost('id');
+
+        // ETAPA IMPORTANTE: Remove a máscara (pontos, traços, barras) do CPF/CNPJ
+        $cpfCnpjLimpo = preg_replace('/[^0-9]/', '', (string) $cpfCnpj);
+
+        if (empty($cpfCnpjLimpo)) {
+            // Se após a limpeza não sobrar nada, não faz a busca
+            return $this->response->setJSON(['exists' => false]);
+        }
+
+        $clienteModel = new \App\Models\ClienteModel();
+
+        $query = $clienteModel->withDeleted()->where('cpf_cnpj', $cpfCnpjLimpo);
 
         if (!empty($idAtual)) {
             $query->where('id !=', $idAtual);

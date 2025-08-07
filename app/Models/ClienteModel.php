@@ -40,8 +40,7 @@ class ClienteModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation (opcional)
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
+  
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
@@ -114,4 +113,30 @@ class ClienteModel extends Model
 
         return $data;
     }
+
+
+    /**
+     * Regras de validação que serão usadas antes de salvar no banco.
+     */
+    protected $validationRules = [
+        'id'            => 'permit_empty|is_natural_no_zero',
+        'nome_completo' => 'required|min_length[3]|max_length[255]',
+        'email'         => 'required|valid_email|is_unique[clientes.email,id,{id}]',
+        'cpf_cnpj'      => 'required|is_unique[clientes.cpf_cnpj,id,{id}]|min_length[11]|max_length[18]',
+    ];
+
+    /**
+     * Mensagens de erro personalizadas para as regras de validação.
+     */
+    protected $validationMessages = [
+        'email' => [
+            'required'    => 'O campo E-mail é obrigatório.',
+            'valid_email' => 'Por favor, insira um endereço de e-mail válido.',
+            'is_unique'   => 'Este e-mail já está cadastrado em nosso sistema.',
+        ],
+        'cpf_cnpj' => [
+            'required'  => 'O campo CPF/CNPJ é obrigatório.',
+            'is_unique' => 'Este CPF/CNPJ já está cadastrado em nosso sistema.',
+        ],
+    ];
 }

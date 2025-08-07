@@ -21,7 +21,8 @@
 
 
         <form action="<?= base_url('dashboard/clientes/salvar') ?>" method="post"
-            data-check-email-url="<?= base_url('dashboard/clientes/check-email') ?>">
+            data-check-email-url="<?= base_url('dashboard/clientes/check-email') ?>"
+            data-check-cpf-url="<?= base_url('dashboard/clientes/check-cpf-cnpj') ?>">
 
             <?= csrf_field() ?>
 
@@ -105,7 +106,7 @@
             <?php endif; ?>
 
             <div class="mt-4">
-                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="submit" id="btn-salvar" class="btn btn-success">Salvar</button>
                 <a href="<?= base_url('dashboard/clientes') ?>" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>

@@ -4,6 +4,12 @@ $routes->group('dashboard', ['filter' => 'admin'], function ($routes) {
     // Rota principal do painel
     $routes->get('', 'painel\dashboard\Dashboard::index');
 
+// Rotas de verificação AJAX
+ $routes->post('clientes/check-cpf-cnpj', 'painel\ClientesController::checkCpfCnpj');
+
+
+
+
     // --- ROTAS DE CLIENTES ---
     $routes->get('clientes', 'painel\ClientesController::index');
     $routes->get('clientes/novo', 'painel\ClientesController::novo');
