@@ -8,8 +8,6 @@ use App\Models\FaturaModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 
 class FaturasController extends BaseController
 {

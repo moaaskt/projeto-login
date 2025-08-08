@@ -104,6 +104,7 @@ class PerfilController extends BaseController
     
     /**
      * Helper privado para regenerar os dados da sessão do usuário.
+     * Isso é importante após atualizações de dados do usuário para garantir que a sessão esteja sempre atualizada.
      */
     private function regenerateUserSession($id)
     {

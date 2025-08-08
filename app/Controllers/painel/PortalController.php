@@ -11,11 +11,14 @@ class PortalController extends BaseController
     protected $usuarioData;
     protected $clienteId;
 
+
+    /**     * Construtor para inicializar dados do usuário e cliente
+     */
+
     public function __construct()
     {
         $this->session = session();
         $this->usuarioData = $this->session->get('usuario');
-        // A "mágica" acontece aqui: pegamos o ID do cliente associado ao usuário logado
         $this->clienteId = $this->usuarioData['cliente_id'] ?? null;
     }
 
@@ -26,13 +29,13 @@ class PortalController extends BaseController
     {
         $faturaModel = new FaturaModel();
         
-        // Exemplo: os dados dos gráficos agora são filtrados pelo cliente
+       
         $data = [
             'title' => 'Meu Portal',
             'stats' => $faturaModel->where('cliente_id', $this->clienteId)->getDashboardStatistics(),
             // ... (preparar dados de gráficos filtrados) ...
         ];
-        // Você precisará criar uma nova view para o dashboard do cliente
+        
         return view('painel/portal/dashboard', $data);
     }
 
@@ -49,7 +52,7 @@ class PortalController extends BaseController
             'faturas' => $faturaModel->where('cliente_id', $this->clienteId)->search($this->request->getGet()),
             'pager'   => $faturaModel->pager
         ];
-        // Você pode criar uma nova view ou adaptar a existente
+        // Renderiza a view com as faturas filtradas
         return view('painel/portal/faturas', $data);
     }
 }

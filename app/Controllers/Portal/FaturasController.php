@@ -3,7 +3,7 @@
 namespace App\Controllers\Portal;
 
 use App\Controllers\BaseController;
-use App\Models\FaturaModel; // Supondo que você tenha um FaturaModel
+use App\Models\FaturaModel; 
 
 class FaturasController extends BaseController
 {
@@ -14,10 +14,8 @@ class FaturasController extends BaseController
     {
         $faturaModel = new FaturaModel();
 
-        // Pega o ID do cliente da sessão.
-        $clienteId = session()->get('usuario')['cliente_id'];
-
-
+        // Pega o ID do cliente da sessão (corrigido para 'id', não 'cliente_id')
+        $clienteId = session()->get('usuario')['id'];
 
         $data = [
             'title'   => 'Minhas Faturas',
@@ -36,7 +34,7 @@ class FaturasController extends BaseController
     public function visualizar($id)
     {
         $faturaModel = new FaturaModel();
-        $clienteId = session()->get('usuario')['cliente_id'];
+        $clienteId = session()->get('usuario')['id'];
 
         // Busca a fatura
         $fatura = $faturaModel->find($id);
@@ -60,17 +58,15 @@ class FaturasController extends BaseController
      */
     public function pagar($id)
     {
-        // A mesma verificação de segurança é necessária aqui
         $faturaModel = new FaturaModel();
-        $clienteId = session()->get('usuario')['cliente_id'];
+        $clienteId = session()->get('usuario')['id'];
         $fatura = $faturaModel->find($id);
 
         if ($fatura === null || $fatura['cliente_id'] != $clienteId) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        // AQUI ENTRARIA A LÓGICA DE INTEGRAÇÃO COM MERCADO PAGO, PAGSEGURO, ETC.
-        // Por enquanto, vamos apenas mostrar uma mensagem.
+        // Pagamento em construção
         return "<h1>Página de Pagamento para a Fatura #{$id}</h1><p>Status: {$fatura['status']}</p><p>Em construção...</p>";
     }
 }

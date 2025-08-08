@@ -7,8 +7,6 @@ use App\Models\ClienteModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use chillerlan\QRCode\{QRCode, QROptions};
 
 

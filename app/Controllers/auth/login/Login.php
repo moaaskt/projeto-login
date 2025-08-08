@@ -4,9 +4,7 @@
 namespace App\Controllers\auth\login;
 
 use App\Controllers\BaseController;
-// 1. TROCAMOS o 'use' do Model pelo 'use' do Repository.
-// O Controller não precisa mais saber do Model, apenas do Repository.
-use App\Repositories\UserRepository;
+
 
 class Login extends BaseController
 {

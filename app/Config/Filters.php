@@ -37,6 +37,7 @@ class Filters extends BaseFilters
         'auth'          => \App\Filters\AuthFilter::class, 
         'admin'    => \App\Filters\AdminFilter::class,   
         'cliente'  => \App\Filters\ClienteFilter::class, 
+        'forcepasswordchange' => \App\Filters\ForcePasswordChange::class,
 
     ];
 
@@ -107,5 +108,8 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+ public array $filters = [
+    'forcepasswordchange' => ['before' => ['cliente/*', 'cliente']], // Aplica a todas as rotas de cliente
+];
+
 }

@@ -13,6 +13,10 @@ class Dashboard extends BaseController
     private $faturaModel;
     private $clienteModel;
 
+
+    /**
+     * Construtor para inicializar dados do usuário e cliente
+     */
     public function __construct()
     {
         $this->session = session();
@@ -23,10 +27,12 @@ class Dashboard extends BaseController
         $this->clienteModel = new ClienteModel();
     }
 
+
     /**
-     * MÉTODO PÚBLICO - O "CARDÁPIO"
-     * Agora ele está limpo, curto e apenas orquestra as tarefas.
+     * Exibe a página principal do dashboard.
+     * Verifica se o usuário está logado e prepara os dados necessários.
      */
+   
     public function index()
     {
         if (empty($this->usuarioData)) {
@@ -45,7 +51,7 @@ class Dashboard extends BaseController
         return view('painel/dashboard/index', $data);
     }
 
-    // --- MÉTODOS PRIVADOS - OS "SEGREDOS DO CHEF" ---
+    // 
 
     /**
      * Prepara os dados para o gráfico de Donut (Distribuição de Status).
@@ -119,6 +125,6 @@ class Dashboard extends BaseController
         ];
     }
 
-    // O método de perfil continua o mesmo
+   
 
 }
