@@ -28,9 +28,7 @@ class UserRepository
             // 2. A lógica de negócio (hash da senha) continua aqui
             'senha'  => password_hash($dados['senha'], PASSWORD_DEFAULT),
             
-            // --- ALTERAÇÃO PRINCIPAL ---
             // 3. Adicionamos o 'cliente_id' que agora é recebido do controller.
-            //    Isso garante que a "ponte" entre as tabelas seja criada.
             'cliente_id' => $dados['cliente_id'],
         ];
 
@@ -51,5 +49,38 @@ class UserRepository
     public function getUsuarioPorEmail(string $email): ?array
     {
         return $this->usuarioModel->where('email', $email)->first();
+    }
+
+
+    // ====================================================================
+    // == MÉTODOS ADICIONADOS PARA RESOLVER O ERRO NO LOGINCONTROLLER ==
+    // ====================================================================
+
+    /**
+     * Repassa a chamada do método 'update' para o UsuarioModel.
+     * Isso permite que o controller use $repo->update() diretamente.
+     *
+     * @param int|string $id O ID do registro a ser atualizado.
+     * @param array $data Os dados para atualização.
+     * @return bool
+     */
+    public function update($id, $data)
+    {
+        return $this->usuarioModel->update($id, $data);
+    }
+
+    /**
+     * Repassa a chamada do método 'where' para o UsuarioModel.
+     * Isso permite o encadeamento de métodos como $repo->where(...)->first().
+     *
+     * @param string $column O nome da coluna.
+     * @param mixed $value O valor a ser comparado.
+     * @return \CodeIgniter\Model Retorna a instância do Model para permitir o encadeamento.
+     */
+    public function where(string $column, $value)
+    {
+        // Retorna a própria instância do model para que outros métodos
+        // como ->where() ou ->first() possam ser chamados em sequência.
+        return $this->usuarioModel->where($column, $value);
     }
 }

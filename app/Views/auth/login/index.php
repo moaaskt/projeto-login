@@ -86,7 +86,6 @@
 </head>
 <body>
 
-
 <main class="login-container">
     <div class="login-header">
         <img src="https://doardigital.com.br/wp-content/uploads/2022/11/Webp.net-resizeimage-1.png" alt="Logo Doar Digital">
@@ -96,25 +95,39 @@
 
     <form action="<?= base_url('login/auth') ?>" method="post">
         
+        <!-- Bloco de mensagens de erro/sucesso -->
         <?php if (session()->getFlashdata('msg')) : ?>
             <div class="alert alert-danger d-flex align-items-center" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 <div><?= session()->getFlashdata('msg') ?></div>
             </div>
         <?php endif; ?>
-        <?php if (session()->get('success')): ?>
-            <div class="alert alert-success"><?= session()->get('success') ?></div>
+
+        <!-- ==================================================================== -->
+        <!-- == ADAPTADO AQUI: Bloco para exibir mensagem de sucesso do reset == -->
+        <!-- ==================================================================== -->
+        <?php if (session()->getFlashdata('msg_success')): ?>
+            <div class="alert alert-success"><?= session()->getFlashdata('msg_success') ?></div>
         <?php endif; ?>
+
 
         <div class="input-group mb-3">
             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
             <input type="email" name="email" id="email" class="form-control form-control-icon" placeholder="seu@email.com" required>
         </div>
 
-        <div class="input-group mb-4">
+        <div class="input-group mb-3"> <!-- Alterado de mb-4 para mb-3 para dar espaço ao novo link -->
             <span class="input-group-text"><i class="fas fa-lock"></i></span>
             <input type="password" name="password" id="password" class="form-control form-control-icon" placeholder="Senha" required>
         </div>
+
+        <!-- =================================================================== -->
+        <!-- == ADAPTADO AQUI: Link para a página "Esqueceu a senha?" == -->
+        <!-- =================================================================== -->
+        <div class="text-end mb-4">
+            <a href="<?= site_url('forgot-password') ?>" style="font-size: 0.9rem; text-decoration: none; color: var(--primary-color);">Esqueceu a senha?</a>
+        </div>
+
 
         <div class="d-grid">
             <button class="btn btn-primary btn-lg" type="submit">Entrar</button>
