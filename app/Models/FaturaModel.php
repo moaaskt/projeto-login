@@ -151,4 +151,91 @@ class FaturaModel extends Model
             ->orderBy("mes", "ASC")
             ->findAll();
     }
+
+
+
+    /**
+     * Calcula e retorna todos os dados necessários para a dashboard de um cliente específico.
+     *
+     * @param integer $clienteId O ID do cliente.
+     * @return array              Array com 'stats', 'status_distribution' e 'monthly_revenue'.
+     */
+    public function getDashboardDataForClient(int $clienteId): array
+    {
+        // --- 1. Buscar estatísticas básicas (Contagem e Soma por Status) ---
+        // Esta única consulta nos dará dados para os cards e para o gráfico de donut.
+        $statsByStatus = $this->select('status, COUNT(id) as count, SUM(valor) as sum')
+            ->where('cliente_id', $clienteId)
+            ->groupBy('status')
+            ->findAll();
+
+        // --- 2. Preparar a estrutura de dados de saída ---
+        $result = [
+            'stats' => [
+                'total_faturas' => 0,
+                'total_pago' => 0,
+                'total_pendente' => 0,
+                'total_vencido' => 0
+            ],
+            'status_distribution' => [
+                'labels' => ['Pagas', 'Pendentes', 'Vencidas', 'Canceladas'],
+                'data'   => [0, 0, 0, 0]
+            ],
+        ];
+
+        // Mapeamento para o array de dados do gráfico de donut
+        $statusMap = ['Paga' => 0, 'Pendente' => 1, 'Vencida' => 2, 'Cancelada' => 3];
+
+        // --- 3. Processar os resultados da consulta ---
+        foreach ($statsByStatus as $row) {
+            $status = ucfirst(strtolower($row['status'])); // Normaliza 'PAGA' ou 'paga' para 'Paga'
+
+            // Preenche os dados dos cards de KPI
+            if ($status === 'Paga') $result['stats']['total_pago'] = (float)$row['sum'];
+            if ($status === 'Pendente') $result['stats']['total_pendente'] = (float)$row['sum'];
+            if ($status === 'Vencida') $result['stats']['total_vencido'] = (float)$row['sum'];
+
+            // Soma a contagem total de faturas
+            $result['stats']['total_faturas'] += (int)$row['count'];
+
+            // Preenche os dados do gráfico de donut
+            if (isset($statusMap[$status])) {
+                $result['status_distribution']['data'][$statusMap[$status]] = (int)$row['count'];
+            }
+        }
+
+        // --- 4. Buscar receita mensal (Faturas Pagas nos últimos 6 meses) ---
+        $sixMonthsAgo = date('Y-m-d', strtotime('-6 months'));
+        $monthlyData = $this->select("SUM(valor) as total, DATE_FORMAT(data_pagamento, '%Y-%m') as mes")
+            ->where('cliente_id', $clienteId)
+            ->where('status', 'Paga')
+            ->where('data_pagamento >=', $sixMonthsAgo)
+            ->groupBy('mes')
+            ->orderBy('mes', 'ASC')
+            ->findAll();
+
+        // --- 5. Preparar dados para o gráfico de área (garantindo todos os 6 meses) ---
+        $revenue = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $monthKey = date('Y-m', strtotime("-$i months"));
+            $monthLabel = date('M', strtotime("-$i months")); // 'M' para abreviação: 'Jan', 'Fev'
+            $revenue[$monthKey] = ['label' => $monthLabel, 'total' => 0];
+        }
+
+        foreach ($monthlyData as $row) {
+            if (isset($revenue[$row['mes']])) {
+                $revenue[$row['mes']]['total'] = (float)$row['total'];
+            }
+        }
+
+        $result['monthly_revenue'] = [
+            'categories' => array_column($revenue, 'label'),
+            'series'     => [
+                'name' => 'Valor Pago',
+                'data' => array_column($revenue, 'total')
+            ]
+        ];
+
+        return $result;
+    }
 }

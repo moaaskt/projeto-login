@@ -9,33 +9,30 @@ use App\Controllers\BaseController;
  */
 class DashboardController extends BaseController
 {
-    /**
+  /**
      * Exibe a nova dashboard com gráficos e estatísticas.
+     * VERSÃO FINAL COM DADOS REAIS
      */
     public function dashboard()
     {
-        // Na próxima etapa, vamos preencher isso com dados reais do banco.
-        // Por enquanto, definimos a estrutura que a view espera.
+        // 1. Instanciar o FaturaModel
+        $faturaModel = new \App\Models\FaturaModel();
+
+        // 2. Pegar o ID do cliente da sessão
+        $clienteId = session()->get('usuario')['id'];
+
+        // 3. Chamar o novo método do model para obter todos os dados da dashboard
+        $dashboardData = $faturaModel->getDashboardDataForClient($clienteId);
+
+        // 4. Montar o array de dados final para a view
         $data = [
-            'titulo' => 'Meu Dashboard',
-            'stats' => [
-                'total_faturas' => 0,
-                'total_pago' => 0,
-                'total_pendente' => 0,
-                'total_vencido' => 0
-            ],
-            'status_distribution' => [
-                'labels' => ['Pagas', 'Pendentes', 'Vencidas', 'Canceladas'],
-                'data'   => [0, 0, 0, 0]
-            ],
-            'monthly_revenue' => [
-                'categories' => ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-                'series' => ['name' => 'Valor Pago', 'data' => [0, 0, 0, 0, 0, 0]]
-            ],
-            'ultimas_faturas' => [],
+            'titulo'              => 'Meu Dashboard',
+            'stats'               => $dashboardData['stats'],
+            'status_distribution' => $dashboardData['status_distribution'],
+            'monthly_revenue'     => $dashboardData['monthly_revenue'],
         ];
 
-        // Carrega a view da dashboard que vamos criar no próximo passo.
+        // 5. Carregar a view, que agora receberá os dados processados
         return view('cliente/dashboard', $data);
     }
 
