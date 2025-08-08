@@ -101,14 +101,26 @@ class DashboardController extends BaseController
 
 
 
-    /**
-     * Exibe a página de perfil do cliente.
+  /**
+     * Exibe a página de perfil do cliente com seus dados.
+     * VERSÃO COMPLETA E FUNCIONAL
      */
     public function perfil()
     {
-        // TODO: Mover a lógica de perfil para cá.
-        // Por enquanto, apenas carregamos a view que você já tem.
-        $data['titulo'] = 'Meu Perfil';
+        // 1. Instanciar o Model de Usuários
+        $usuarioModel = new \App\Models\UsuarioModel();
+
+        // 2. Pegar o ID do usuário logado na sessão
+        $usuarioId = session()->get('usuario')['id'];
+
+        // 3. Montar o array de dados para a view
+        $data = [
+            'title'   => 'Meu Perfil',
+            // 4. Buscar os dados do usuário no banco e passá-los para a view
+            'usuario' => $usuarioModel->find($usuarioId)
+        ];
+        
+        // 5. Carregar a view de perfil, agora com os dados do usuário
         return view('cliente/perfil', $data);
     }
 }
