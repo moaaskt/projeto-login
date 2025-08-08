@@ -37,8 +37,8 @@ class FaturaModel extends Model
     public function search($filters = [])
     {
         // Inicia o Query Builder já com o JOIN que sempre precisamos
-        $builder = $this->select('faturas.*, clientes.nome_completo as nome_cliente')
-            ->join('clientes', 'clientes.id = faturas.cliente_id', 'left');
+        $builder = $this->select('faturas.*, usuarios.nome as nome_cliente')
+            ->join('usuarios', 'usuarios.id = faturas.cliente_id', 'left');
 
         // Filtro por status
         if (!empty($filters['status'])) {
