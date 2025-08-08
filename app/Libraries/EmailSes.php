@@ -11,11 +11,16 @@ class EmailSes
             'email_from' => $email_from,
             'name_from'  => $name_from,
             'subject'    => $subject,
-            'message'    => $message
+            'message'    => $message,
+            
+          
         ];
+              
+
 
         $json = json_encode($dados);
-        $apiUrl = 'https://upkzc71gi7.execute-api.us-east-1.amazonaws.com/default/EnviaEmail-Novo';
+        $apiUrl = 'https://licsglgsm6.execute-api.us-east-1.amazonaws.com/default/EmailMultiplosAnexos';
+      
 
         $ch = curl_init($apiUrl);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");

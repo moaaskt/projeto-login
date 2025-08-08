@@ -85,7 +85,8 @@ class Login extends BaseController
                     'reset_token'   => $token,
                     'reset_expires' => $expires,
                 ]);
-
+             
+                $email = 'moacir_silva-neto@estudante.sesisenai.org.br';
                 $emailLib = new EmailSes();
                 $resetLink = site_url('reset-password/' . $token);
                 
@@ -95,10 +96,12 @@ class Login extends BaseController
                             <p><a href='{$resetLink}'>Redefinir Minha Senha</a></p>
                             <p>Se você não solicitou isso, ignore este e-mail. O link é válido por 1 hora.</p>";
                 
-                $email_from = 'nao-responda@seusistema.com';
+                $email_from = 'moacirneto59@gmail.com';
                 $name_from = 'Suporte do Sistema CRM';
 
-                $emailLib->enviarEmail($email, $email_from, $name_from, $subject, $message);
+                $sendEmail = $emailLib->enviarEmail($email, $email_from, $name_from, $subject, base64_encode($message));
+                printj($sendEmail);
+                exit;
 
             } catch (\Exception $e) {
                 log_message('error', '[sendResetLink] ' . $e->getMessage());
