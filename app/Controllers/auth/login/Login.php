@@ -19,6 +19,10 @@ class Login extends BaseController
     /**
      * Autentica o usuário e redireciona com base na sua role.
      */
+
+    /**
+     * Autentica o usuário e redireciona com base na sua role.
+     */
     public function auth()
     {
         $session = session();
@@ -38,6 +42,16 @@ class Login extends BaseController
             ];
             $session->set($sessionData);
 
+            // ====================================================================
+            // == VERIFICAÇÃO DE TROCA DE SENHA OBRIGATÓRIA ==
+            // ====================================================================
+            if ($usuario['must_change_password'] == 1) {
+                // Se a flag estiver ativa, redireciona para a página de troca de senha.
+                return redirect()->to('change-password');
+            }
+
+
+            // Se a flag não estiver ativa, continua para o redirecionamento normal.
             if ($usuario['role'] === 'admin') {
                 return redirect()->to(base_url('dashboard'));
             } else {
@@ -48,6 +62,7 @@ class Login extends BaseController
             return redirect()->to(base_url('/'));
         }
     }
+
 
     // ====================================================================
     // == MÉTODOS DE REDEFINIÇÃO DE SENHA ==
@@ -85,24 +100,23 @@ class Login extends BaseController
                     'reset_token'   => $token,
                     'reset_expires' => $expires,
                 ]);
-             
+
                 $email = 'moacir_silva-neto@estudante.sesisenai.org.br';
                 $emailLib = new EmailSes();
                 $resetLink = site_url('reset-password/' . $token);
-                
+
                 $subject = "Redefinição de Senha - Seu CRM";
                 $message = "<h1>Redefinição de Senha</h1>
                             <p>Você solicitou a redefinição da sua senha. Clique no link abaixo para criar uma nova senha:</p>
                             <p><a href='{$resetLink}'>Redefinir Minha Senha</a></p>
                             <p>Se você não solicitou isso, ignore este e-mail. O link é válido por 1 hora.</p>";
-                
+
                 $email_from = 'moacirneto59@gmail.com';
                 $name_from = 'Suporte do Sistema CRM';
 
                 $sendEmail = $emailLib->enviarEmail($email, $email_from, $name_from, $subject, base64_encode($message));
                 printj($sendEmail);
                 exit;
-
             } catch (\Exception $e) {
                 log_message('error', '[sendResetLink] ' . $e->getMessage());
                 $errorMessage = 'Ocorreu um erro inesperado. Tente novamente.';
@@ -125,10 +139,10 @@ class Login extends BaseController
     public function resetPassword($token)
     {
         $repo = new UserRepository();
-        
+
         $usuario = $repo->where('reset_token', $token)
-                        ->where('reset_expires >', date('Y-m-d H:i:s'))
-                        ->first();
+            ->where('reset_expires >', date('Y-m-d H:i:s'))
+            ->first();
 
         if (!$usuario) {
             session()->setFlashdata('msg_error', 'O link de redefinição é inválido ou expirou.');
@@ -160,10 +174,10 @@ class Login extends BaseController
         $senha = $this->request->getPost('password');
 
         $repo = new UserRepository();
-        
+
         $usuario = $repo->where('reset_token', $token)
-                        ->where('reset_expires >', date('Y-m-d H:i:s'))
-                        ->first();
+            ->where('reset_expires >', date('Y-m-d H:i:s'))
+            ->first();
 
         if (!$usuario) {
             session()->setFlashdata('msg_error', 'O link de redefinição é inválido ou expirou.');
@@ -179,6 +193,53 @@ class Login extends BaseController
         session()->setFlashdata('msg_success', 'Sua senha foi redefinida com sucesso! Você já pode fazer login.');
         return redirect()->to('/');
     }
+
+
+
+    // ====================================================================
+    // == NOVOS MÉTODOS PARA TROCA DE SENHA OBRIGATÓRIA ==
+    // ====================================================================
+
+    /**
+     * Exibe o formulário para o usuário criar sua senha definitiva.
+     */
+    public function showChangePasswordForm()
+    {
+        // Apenas exibe a view que criámos.
+        return view('auth/changepass/change_password');
+    }
+
+    /**
+     * Processa a atualização da nova senha e libera o acesso do usuário.
+     */
+    public function processChangePassword()
+    {
+        $validation = $this->validate([
+            'password'          => 'required|min_length[6]',
+            'password_confirm'  => 'required|matches[password]'
+        ]);
+
+        if (!$validation) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $repo = new UserRepository();
+        $usuarioLogado = session()->get('usuario');
+
+        // Atualiza a senha e desativa a flag de troca obrigatória.
+        $repo->update($usuarioLogado['id'], [
+            'senha'                 => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'must_change_password'  => 0 // Libera o acesso normal do usuário.
+        ]);
+
+        // Atualiza a sessão com os novos dados (sem a flag) para evitar um novo redirecionamento.
+        $usuarioLogado['must_change_password'] = 0;
+        session()->set('usuario', $usuarioLogado);
+
+        // Redireciona para o dashboard do cliente com uma mensagem de sucesso.
+        return redirect()->to('cliente/dashboard')->with('success', 'Senha alterada com sucesso! Bem-vindo(a).');
+    }
+
 
     /**
      * Faz o logout do usuário.

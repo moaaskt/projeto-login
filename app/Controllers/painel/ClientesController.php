@@ -18,20 +18,12 @@ class ClientesController extends BaseController
     public function index()
     {
         $clienteModel = new ClienteModel();
-
-        // Coleta os filtros da query string
         $filters = [
             'termo' => $this->request->getGet('termo'),
             'data_cadastro' => $this->request->getGet('data_cadastro'),
         ];
-
-        // Remove filtros vazios
         $filters = array_filter($filters);
-
-        // Passa os filtros para o model e obtém os resultados paginados
         $clientes = $clienteModel->search($filters);
-
-        // Pegamos o pager para usar na view
         $pager = $clienteModel->pager;
 
         return view('painel/clientes/index', [
@@ -68,28 +60,13 @@ class ClientesController extends BaseController
     public function salvar()
     {
         $clienteModel = new \App\Models\ClienteModel();
-
-        // Só pega os campos permitidos — mais seguro
         $dados = $this->request->getPost([
-            'id',
-            'nome_completo',
-            'email',
-            'telefone',
-            'cpf_cnpj',
-            'cep',
-            'logradouro',
-            'numero',
-            'bairro',
-            'cidade',
-            'estado',
-            'data_nascimento',
-
+            'id', 'nome_completo', 'email', 'telefone', 'cpf_cnpj', 'cep',
+            'logradouro', 'numero', 'bairro', 'cidade', 'estado', 'data_nascimento',
         ]);
-        // dd($dados);
-
+        
         if ($clienteModel->save($dados)) {
             $senhaTemporaria = null;
-
             if ($this->request->getPost('criar_acesso') && empty($dados['id'])) {
                 $novoClienteId = $clienteModel->getInsertID();
                 $senhaTemporaria = $this->_criarAcessoPortal($novoClienteId, $dados);
@@ -99,7 +76,6 @@ class ClientesController extends BaseController
             if ($senhaTemporaria) {
                 $mensagem .= " Acesso ao portal criado com a senha temporária: <strong>{$senhaTemporaria}</strong>. Por favor, informe o cliente.";
             }
-
             return redirect()->to(base_url('dashboard/clientes'))->with('success', $mensagem);
         } else {
             return redirect()->back()->withInput()->with('errors', $clienteModel->errors());
@@ -114,8 +90,6 @@ class ClientesController extends BaseController
     private function _criarAcessoPortal($clienteId, $dadosCliente): string
     {
         $usuarioModel = new \App\Models\UsuarioModel();
-
-        // Gera uma senha aleatória e segura para o primeiro acesso
         $senhaTemporaria = bin2hex(random_bytes(4)); // 8 caracteres
 
         $dadosUsuario = [
@@ -124,6 +98,13 @@ class ClientesController extends BaseController
             'email'      => $dadosCliente['email'],
             'senha'      => password_hash($senhaTemporaria, PASSWORD_DEFAULT),
             'role'       => 'cliente',
+
+            // ====================================================================
+            // == IMPLEMENTAÇÃO ADICIONADA AQUI ==
+            // Esta linha marca o usuário para que ele seja forçado a trocar
+            // a senha no seu primeiro login.
+            // ====================================================================
+            'must_change_password' => 1,
         ];
 
         $usuarioModel->insert($dadosUsuario);
@@ -138,23 +119,17 @@ class ClientesController extends BaseController
      */
     public function checkEmail()
     {
-        if (! $this->request->isAJAX()) {
+        if (!$this->request->isAJAX()) {
             return $this->response->setStatusCode(403, 'Acesso Negado');
         }
-
         $email = $this->request->getPost('email');
         $idAtual = $this->request->getPost('id');
-
         $clienteModel = new \App\Models\ClienteModel();
-
         $query = $clienteModel->withDeleted()->where('email', $email);
-
         if (!empty($idAtual)) {
             $query->where('id !=', $idAtual);
         }
-
         $clienteExistente = $query->first();
-
         return $this->response->setJSON(['exists' => ($clienteExistente !== null)]);
     }
 
@@ -165,52 +140,63 @@ class ClientesController extends BaseController
      */
     public function checkCpfCnpj()
     {
-        if (! $this->request->isAJAX()) {
+        if (!$this->request->isAJAX()) {
             return $this->response->setStatusCode(403, 'Acesso Negado');
         }
-
         $cpfCnpj = $this->request->getPost('cpf_cnpj');
         $idAtual = $this->request->getPost('id');
-
-        // ETAPA IMPORTANTE: Remove a máscara (pontos, traços, barras) do CPF/CNPJ
         $cpfCnpjLimpo = preg_replace('/[^0-9]/', '', (string) $cpfCnpj);
-
         if (empty($cpfCnpjLimpo)) {
-            // Se após a limpeza não sobrar nada, não faz a busca
             return $this->response->setJSON(['exists' => false]);
         }
-
         $clienteModel = new \App\Models\ClienteModel();
-
         $query = $clienteModel->withDeleted()->where('cpf_cnpj', $cpfCnpjLimpo);
-
         if (!empty($idAtual)) {
             $query->where('id !=', $idAtual);
         }
-
         $clienteExistente = $query->first();
-
         return $this->response->setJSON(['exists' => ($clienteExistente !== null)]);
     }
 
 
+  /**
+ * Exclui um cliente e o seu acesso de usuário associado de forma segura.
+ */
+public function excluir($id)
+{
+    $clienteModel = new \App\Models\ClienteModel();
+    $usuarioModel = new \App\Models\UsuarioModel();
 
+    // 1. Obtemos a conexão com o banco de dados para usar transações.
+    //    Isso garante que ou ambas as exclusões funcionam, ou nenhuma delas.
+    $db = \Config\Database::connect();
+    $db->transStart();
 
+    // 2. Encontra o usuário associado ao cliente que será excluído.
+    $usuario = $usuarioModel->where('cliente_id', $id)->first();
 
-    /**
-     * Exclui um cliente.
-     */
-    public function excluir($id)
-    {
-        $clienteModel = new ClienteModel();
-        if ($clienteModel->delete($id)) {
-            return redirect()->to(base_url('dashboard/clientes'))->with('success', 'Cliente excluído com sucesso!');
-        } else {
-            return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Ocorreu um erro ao excluir o cliente.');
-        }
+    // 3. Se um usuário for encontrado, ele é excluído permanentemente.
+    if ($usuario) {
+        // O segundo parâmetro `true` força uma exclusão permanente (hard delete),
+        // que apaga a linha do banco e libera o e-mail para ser usado novamente.
+        $usuarioModel->delete($usuario['id'], true);
     }
 
+    // 4. Exclui o cliente da tabela de clientes (soft ou hard delete, conforme seu model).
+    $clienteModel->delete($id);
 
+    // 5. Finaliza a transação.
+    if ($db->transStatus() === false) {
+        // Se algo deu errado, desfaz tudo para não corromper os dados.
+        $db->transRollback();
+        return redirect()->to(base_url('dashboard/clientes'))->with('error', 'Ocorreu um erro ao excluir o cliente e seu acesso.');
+    } else {
+        // Se tudo correu bem, confirma as alterações no banco.
+        $db->transCommit();
+        return redirect()->to(base_url('dashboard/clientes'))->with('success', 'Cliente e seu acesso ao portal foram excluídos com sucesso!');
+    }
+}
+    // ... Seus outros métodos (importar, gerarModeloExcel, visualizar, gerarPdf) continuam aqui sem alterações ...
     public function importar()
     {
         $file = $this->request->getFile('excel_file');
@@ -238,7 +224,6 @@ class ClientesController extends BaseController
                     continue;
                 }
 
-                // MAPEAMENTO ATUALIZADO COM OS NOVOS CAMPOS DE ENDEREÇO
                 $clienteData = [
                     'nome_completo'   => $row['A'] ?? null,
                     'cpf_cnpj'        => $row['B'] ?? null,
@@ -293,40 +278,24 @@ class ClientesController extends BaseController
         }
     }
 
-
-    // Em app/Controllers/painel/ClientesController.php
-
-    /**
-     * Gera e força o download de uma planilha Excel de modelo para importação de clientes.
-     */
     public function gerarModeloExcel()
     {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Modelo de Importação');
 
-        // CABEÇALHOS ATUALIZADOS COM OS NOVOS CAMPOS
         $headers = [
-            'nome_completo',
-            'cpf_cnpj',
-            'email',
-            'telefone',
-            'logradouro', // NOVO
-            'numero',     // NOVO
-            'bairro',     // NOVO
-            'cidade',     // NOVO
-            'estado',     // NOVO
-            'cep',
+            'nome_completo', 'cpf_cnpj', 'email', 'telefone', 'logradouro',
+            'numero', 'bairro', 'cidade', 'estado', 'cep',
             'data_nascimento (formato AAAA-MM-DD)',
         ];
         $sheet->fromArray($headers, null, 'A1');
 
-        // Estilo e auto-ajuste de colunas
-        $headerStyle = $sheet->getStyle('A1:K1'); // Agora vai até a coluna K
+        $headerStyle = $sheet->getStyle('A1:K1');
         $headerStyle->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE));
         $headerStyle->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('4F46E5');
 
-        foreach (range('A', 'K') as $col) { // Agora vai até a coluna K
+        foreach (range('A', 'K') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -341,9 +310,6 @@ class ClientesController extends BaseController
         exit();
     }
 
-    /**
-     * Exibe a página de detalhes de um cliente.
-     */
     public function visualizar($id)
     {
         $clienteModel = new ClienteModel();
@@ -353,43 +319,30 @@ class ClientesController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Não foi possível encontrar o cliente com ID: ' . $id);
         }
 
-        // --- INÍCIO DA LÓGICA DO QR CODE ---
-
-        // 1. Monta o texto no formato vCard com os dados do cliente.
-        // É um formato padrão que todos os celulares entendem.
         $vcard = "BEGIN:VCARD\n";
         $vcard .= "VERSION:3.0\n";
-        $vcard .= "FN:" . esc($cliente['nome_completo']) . "\n"; // FN = Full Name
-        $vcard .= "TEL;TYPE=CELL:" . esc($cliente['telefone']) . "\n"; // TEL = Telefone
-        $vcard .= "EMAIL:" . esc($cliente['email']) . "\n"; // EMAIL
+        $vcard .= "FN:" . esc($cliente['nome_completo']) . "\n";
+        $vcard .= "TEL;TYPE=CELL:" . esc($cliente['telefone']) . "\n";
+        $vcard .= "EMAIL:" . esc($cliente['email']) . "\n";
         $vcard .= "END:VCARD";
 
-        // 2. Configura a biblioteca de QR Code
         $options = new QROptions([
             'outputType' => QRCode::OUTPUT_IMAGE_PNG,
             'eccLevel'   => QRCode::ECC_L,
             'scale'      => 5,
         ]);
 
-        // 3. Gera a imagem do QR Code como uma Data URI
-        // Isso nos permite embutir a imagem diretamente no HTML, sem precisar salvar um arquivo no servidor.
-        // É uma técnica limpa e eficiente.
         $qrCodeDataUri = (new QRCode($options))->render($vcard);
-
-        // --- FIM DA LÓGICA DO QR CODE ---
 
         $data = [
             'cliente'       => $cliente,
             'title'         => 'Detalhes do Cliente',
-            'qrCodeDataUri' => $qrCodeDataUri, // 4. Envia o QR Code para a View
+            'qrCodeDataUri' => $qrCodeDataUri,
         ];
 
         return view('painel/clientes/visualizar', $data);
     }
 
-    /**
-     * Gera e exibe um PDF com os detalhes do cliente.
-     */
     public function gerarPdf($id)
     {
         $clienteModel = new ClienteModel();
@@ -400,9 +353,6 @@ class ClientesController extends BaseController
         }
 
         $dataCadastro = date('d/m/Y H:i', strtotime($cliente['created_at']));
-
-        // --- AQUI ESTÁ A CORREÇÃO ---
-        // Construindo o endereço completo a partir das novas colunas
         $enderecoCompleto = esc($cliente['logradouro'] ?: 'Não informado');
         if (!empty($cliente['numero'])) {
             $enderecoCompleto .= ', ' . esc($cliente['numero']);
@@ -412,8 +362,6 @@ class ClientesController extends BaseController
         }
         $cidadeEstado = esc($cliente['cidade'] ?: 'Não informada') . ' - ' . esc($cliente['estado'] ?: 'NI');
 
-
-        // Preparando o HTML que será convertido em PDF
         $html = "
             <style>
                 body { font-family: sans-serif; font-size: 12px; }
@@ -445,18 +393,15 @@ class ClientesController extends BaseController
             </dl>
         ";
 
-        // Configurações do Dompdf
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
 
-        // Instancia o Dompdf
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        // Exibe o PDF no navegador
         $dompdf->stream("detalhes_cliente_" . $cliente['id'] . ".pdf", ["Attachment" => false]);
     }
 }

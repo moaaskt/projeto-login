@@ -43,12 +43,11 @@ class Cadastro extends BaseController
             'nome_completo' => $this->request->getPost('nome'),
             'email'         => $this->request->getPost('email'),
         ];
-
+       
      
         $clienteRepo->insert($dadosCliente);
      
         $novoClienteId = $clienteRepo->getLastInsertID();
-
 
       
         if (!$novoClienteId) {
@@ -61,7 +60,7 @@ class Cadastro extends BaseController
             'senha'      => $this->request->getPost('senha'),
             'cliente_id' => $novoClienteId, 
         ];
-
+      
         
         if ($userRepo->criarUsuario($dadosUsuario)) {
             return redirect()->to(base_url('/'))->with('success', 'Cadastro realizado com sucesso! Faça seu login.');

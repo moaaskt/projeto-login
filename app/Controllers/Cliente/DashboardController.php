@@ -4,6 +4,7 @@ namespace App\Controllers\Cliente;
 
 use App\Controllers\BaseController;
 use App\Models\FaturaModel;
+use App\Repositories\UserRepository;
 
 /**
  * Controla todas as páginas da área logada do cliente.
@@ -141,6 +142,45 @@ class DashboardController extends BaseController
 
         return view('cliente/faturas/visualizar', $data);
     }
+
+
+     /**
+     * Processa a alteração de senha feita pelo cliente no seu perfil.
+     */
+    public function salvarSenha()
+    {
+        // 1. Validação dos campos
+        $validation = $this->validate([
+            'senha_atual'       => 'required',
+            'nova_senha'        => 'required|min_length[6]',
+            'confirmar_senha'   => 'required|matches[nova_senha]'
+        ]);
+
+        if (!$validation) {
+            return redirect()->to('cliente/perfil')->with('errors', $this->validator->getErrors());
+        }
+
+        $repo = new UserRepository();
+        $usuarioLogado = session()->get('usuario');
+
+        // 2. Verifica se a senha atual está correta
+        $usuarioNoBanco = $repo->find($usuarioLogado['id']);
+        $senhaAtual = $this->request->getPost('senha_atual');
+
+        if (!password_verify($senhaAtual, $usuarioNoBanco['senha'])) {
+            return redirect()->to('cliente/perfil')->with('error', 'A sua senha atual está incorreta.');
+        }
+
+        // 3. Se estiver tudo certo, atualiza para a nova senha
+        $novaSenhaHash = password_hash($this->request->getPost('nova_senha'), PASSWORD_DEFAULT);
+        
+        if ($repo->update($usuarioLogado['id'], ['senha' => $novaSenhaHash])) {
+            return redirect()->to('cliente/perfil')->with('success', 'Senha alterada com sucesso!');
+        } else {
+            return redirect()->to('cliente/perfil')->with('error', 'Ocorreu um erro ao atualizar a sua senha. Tente novamente.');
+        }
+    }
+
 
 
 

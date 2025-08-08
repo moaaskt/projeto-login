@@ -31,7 +31,8 @@ class UsuarioModel extends Model
         'role',
         'cliente_id', 
         'reset_token',
-        'reset_expires'
+        'reset_expires',
+        'must_change_password'
     ];
 
 

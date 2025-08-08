@@ -17,3 +17,9 @@ $routes->post('update-password', 'auth\login\Login::updatePassword');
 
 $routes->post('login/auth', 'auth\login\Login::auth');
 $routes->get('logout', 'auth\login\Login::logout');
+
+
+// Rotas para forçar a troca de senha no primeiro login
+// O filtro 'auth' garante que apenas utilizadores logados acedam a estas rotas.
+$routes->get('change-password', 'auth\login\Login::showChangePasswordForm', ['filter' => 'auth']);
+$routes->post('force-change-password', 'auth\login\Login::processChangePassword', ['filter' => 'auth']);
