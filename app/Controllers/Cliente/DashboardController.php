@@ -4,12 +4,13 @@ namespace App\Controllers\Cliente;
 
 use App\Controllers\BaseController;
 use App\Models\FaturaModel;
+
 /**
  * Controla todas as páginas da área logada do cliente.
  */
 class DashboardController extends BaseController
 {
-  /**
+    /**
      * Exibe a nova dashboard com gráficos e estatísticas.
      * VERSÃO FINAL COM DADOS REAIS
      */
@@ -35,6 +36,51 @@ class DashboardController extends BaseController
         // 5. Carregar a view, que agora receberá os dados processados
         return view('cliente/dashboard', $data);
     }
+
+
+
+    public function processarPagamentoFicticio()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403, 'Acesso Negado');
+        }
+
+        try {
+            // Pega o array 'usuario' da sessão
+            $usuarioLogado = session()->get('usuario');
+
+            // Validação de segurança: verifica se o usuário está logado e se o array existe
+            if (!$usuarioLogado || !isset($usuarioLogado['id'])) {
+                throw new \Exception('Sessão inválida. Por favor, faça login novamente.');
+            }
+
+            // ## CORREÇÃO APLICADA AQUI ##
+            // Pegamos o ID de dentro do array do usuário
+            $clienteId = $usuarioLogado['id'];
+
+            $json = $this->request->getJSON();
+            $faturaId = $json->fatura_id;
+
+            $faturaModel = new \App\Models\FaturaModel();
+
+            // A validação agora vai funcionar corretamente
+            $fatura = $faturaModel->where('id', $faturaId)->where('cliente_id', $clienteId)->first();
+
+            if (!$fatura) {
+                throw new \Exception('Fatura inválida ou não autorizada.');
+            }
+
+            $faturaModel->update($faturaId, ['status' => 'Paga']);
+
+            return $this->response->setJSON(['success' => true]);
+        } catch (\Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
 
     /**
      * Exibe a lista de faturas do cliente.
@@ -98,7 +144,7 @@ class DashboardController extends BaseController
 
 
 
-  /**
+    /**
      * Exibe a página de perfil do cliente com seus dados.
      * VERSÃO COMPLETA E FUNCIONAL
      */
@@ -116,15 +162,15 @@ class DashboardController extends BaseController
             // 4. Buscar os dados do usuário no banco e passá-los para a view
             'usuario' => $usuarioModel->find($usuarioId)
         ];
-        
+
         // 5. Carregar a view de perfil, agora com os dados do usuário
         return view('cliente/perfil', $data);
     }
 
-      public function pagar($id)
+    public function pagar($id)
     {
         $faturaModel = new FaturaModel();
-        
+
         // Obter o ID do cliente logado a partir da sessão
         $clienteId = session()->get('usuario_id');
 

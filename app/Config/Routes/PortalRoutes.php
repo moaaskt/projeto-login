@@ -20,6 +20,9 @@ $routes->group('cliente', ['namespace' => 'App\Controllers\Cliente', 'filter' =>
     $routes->get('faturas/visualizar/(:num)', 'DashboardController::visualizar/$1');
     $routes->get('faturas/pagar/(:num)', 'DashboardController::pagar/$1');
 
+    $routes->post('faturas/processar_pagamento_ficticio', 'DashboardController::processarPagamentoFicticio');
+
+
 
     // Se você tiver um FaturasController específico para ações, ele seria chamado aqui:
     // Ex: $routes->get('faturas/visualizar/(:num)', 'FaturasController::visualizar/$1');
