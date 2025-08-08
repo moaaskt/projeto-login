@@ -10,10 +10,6 @@
 
 <div class="container-fluid py-4">
     <!-- Título -->
-    <div class="mb-4">
-        <h4 class="fw-bold mb-0 text-white">Dashboard</h4>
-        <small class="text-muted">Resumo das suas faturas e pagamentos</small>
-    </div>
 
     <!-- Cards de estatísticas -->
     <div class="row g-4">
