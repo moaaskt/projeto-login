@@ -66,7 +66,7 @@
                 <h5 class="card-title"><?= esc($usuario['nome']) ?></h5>
                 <p class="card-text text-muted"><?= esc($usuario['email']) ?></p>
 
-                <a href="#" class="btn btn-outline-primary btn-sm">Alterar Foto</a>
+                <!-- <a href="#" class="btn btn-outline-primary btn-sm">Alterar Foto</a> -->
             </div>
         </div>
     </div>

@@ -1,36 +1,61 @@
-document.addEventListener("DOMContentLoaded", function () {
-    Apex.chart = {
-        foreColor: '#ccc'
-    };
+/**
+ * Inicializa os gráficos da dashboard do cliente
+ * Este script espera que as constantes 'statusChartData' e 'revenueChartData'
+ * já existam na página, vindas da view PHP.
+ */
+document.addEventListener("DOMContentLoaded", function() {
 
-    var statusOptions = {
+    // 1. Opções para o Gráfico de Situação das Faturas (Donut)
+    const statusOptions = {
         series: statusChartData.series,
         labels: statusChartData.labels,
         chart: {
             type: 'donut',
-            height: 350,
-            foreColor: '#ccc'
+            height: 360,
+            foreColor: '#c9d1d9' // Cor do texto para tema escuro
         },
-        theme: { mode: 'dark' },
-        colors: ['#00E396', '#FEB019', '#FF4560', '#775DD0'],
-        legend: { position: 'bottom' },
+        colors: ['#238636', '#d29922', '#da3633', '#8b949e'], // Cores para Paga, Pendente, Vencida, Cancelada
+        dataLabels: {
+            enabled: false // Remove os textos de porcentagem de dentro das fatias
+        },
         plotOptions: {
             pie: {
                 donut: {
-                    size: '70%'
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Total',
+                            formatter: function (w) {
+                                // Soma todos os valores da série para mostrar o total no centro
+                                return w.globals.seriesTotals.reduce((a, b) => { return a + b }, 0)
+                            }
+                        }
+                    }
                 }
             }
         },
-        dataLabels: { enabled: true },
-        tooltip: { theme: 'dark' },
-        responsive: [{
-            breakpoint: 576,
-            options: { chart: { height: 250 } }
-        }]
+        legend: {
+            position: 'bottom',
+            horizontalAlign: 'center',
+            // CORREÇÃO APLICADA: Adiciona um espaçamento vertical de 10px
+            offsetY: 10,
+            itemMargin: {
+                vertical: 5
+            }
+        }
     };
-    new ApexCharts(document.querySelector("#statusDistributionChart"), statusOptions).render();
 
-    var revenueOptions = {
+    // Renderiza o gráfico de Donut, se o elemento existir na página
+    const statusChartEl = document.querySelector("#statusDistributionChart");
+    if (statusChartEl) {
+        const statusChart = new ApexCharts(statusChartEl, statusOptions);
+        statusChart.render();
+    }
+
+
+    // 2. Opções para o Gráfico de Histórico de Pagamentos (Área)
+    const revenueOptions = {
         series: [{
             name: revenueChartData.name,
             data: revenueChartData.data
@@ -39,45 +64,42 @@ document.addEventListener("DOMContentLoaded", function () {
             type: 'area',
             height: 350,
             toolbar: { show: false },
-            foreColor: '#ccc'
+            foreColor: '#c9d1d9'
         },
-        theme: { mode: 'dark' },
         dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 3 },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shade: 'dark',
-                gradientToColors: ['#ABE5A1'],
-                shadeIntensity: 1,
-                type: 'horizontal',
-                opacityFrom: 0.7,
-                opacityTo: 0.2,
-                stops: [0, 100]
-            }
-        },
+        stroke: { curve: 'smooth' },
         xaxis: {
-            categories: revenueChartData.categories
+            type: 'category',
+            categories: revenueChartData.categories,
+            labels: {
+                style: {
+                    colors: '#8b949e'
+                }
+            }
         },
         yaxis: {
             labels: {
-                formatter: function (val) {
-                    return "R$ " + val.toFixed(2).replace('.', ',');
-                }
+                style: {
+                    colors: '#8b949e'
+                },
+                formatter: function (val) { return "R$ " + val.toFixed(2).replace('.', ',') }
             }
         },
         tooltip: {
             theme: 'dark',
             y: {
-                formatter: function (val) {
-                    return "R$ " + val.toFixed(2).replace('.', ',');
-                }
+                formatter: function (val) { return "R$ " + val.toFixed(2).replace('.', ',') }
             }
         },
         grid: {
-            borderColor: '#444',
-            strokeDashArray: 4
+            borderColor: '#30363d'
         }
     };
-    new ApexCharts(document.querySelector("#monthlyRevenueChart"), revenueOptions).render();
+
+    // Renderiza o gráfico de Área, se o elemento existir na página
+    const revenueChartEl = document.querySelector("#monthlyRevenueChart");
+    if (revenueChartEl) {
+        const revenueChart = new ApexCharts(revenueChartEl, revenueOptions);
+        revenueChart.render();
+    }
 });
