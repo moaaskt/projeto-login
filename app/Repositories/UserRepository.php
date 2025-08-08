@@ -83,4 +83,17 @@ class UserRepository
         // como ->where() ou ->first() possam ser chamados em sequência.
         return $this->usuarioModel->where($column, $value);
     }
+
+       /**
+     * Repassa a chamada do método 'find' para o UsuarioModel.
+     *
+     * @param int|string $id O ID do registro a ser encontrado.
+     * @return mixed
+     */
+    public function find($id)
+    {
+        return $this->usuarioModel->find($id);
+    }
+
+
 }
