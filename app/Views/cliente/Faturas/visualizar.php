@@ -1,10 +1,10 @@
-<?= $this->extend('portal/templates/default') ?>
+<?= $this->extend('cliente/templates/default') ?>
 
 <?= $this->section('title') ?><?= esc($title) ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 
-<a href="<?= base_url('portal/faturas') ?>" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Voltar para a lista</a>
+<a href="<?= base_url('cliente/faturas') ?>" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Voltar para a lista</a>
 
 <h1 class="h3 mb-4">Detalhes da Fatura #<?= esc($fatura['id']) ?></h1>
 
@@ -30,7 +30,7 @@
         <hr>
 
         <?php if ($fatura['status'] !== 'paga'): ?>
-            <a href="<?= base_url('portal/faturas/pagar/' . $fatura['id']) ?>" class="btn btn-success btn-lg">
+            <a href="<?= base_url('cliente/faturas/pagar/' . $fatura['id']) ?>" class="btn btn-success btn-lg">
                 <i class="fas fa-dollar-sign"></i> Pagar Fatura
             </a>
         <?php else: ?>

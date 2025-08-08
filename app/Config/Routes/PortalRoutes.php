@@ -1,14 +1,25 @@
 <?php
 
-// Rotas exclusivas para o cliente logado
-$routes->group('portal', ['namespace' => 'App\Controllers\Portal', 'filter' => 'auth'], static function ($routes) {
+/*
+ * =================================================================----
+ * ROTEAMENTO DA ÁREA DO CLIENTE (VERSÃO CORRIGIDA E UNIFICADA)
+ * =================================================================----
+ * Usaremos apenas o prefixo /cliente para todas as rotas.
+ * O namespace aponta para a pasta de controllers do cliente.
+ */
+$routes->group('cliente', ['namespace' => 'App\Controllers\Cliente', 'filter' => 'auth'], static function ($routes) {
 
-    // A rota principal do portal agora aponta para o controller de faturas.
-    $routes->get('', 'FaturasController::index');
-    $routes->get('dashboard', 'Cliente\DashboardController::dashboard');
+    // A rota principal do portal do cliente será a nova Dashboard
+    $routes->get('/', 'DashboardController::dashboard');
+    $routes->get('dashboard', 'DashboardController::dashboard');
 
-    // --- ROTAS DE FATURAS DO CLIENTE ---
-    $routes->get('faturas', 'FaturasController::index'); // Esta linha pode ser até redundante agora, mas não causa problema.
-    $routes->get('faturas/visualizar/(:num)', 'FaturasController::visualizar/$1');
-    $routes->get('faturas/pagar/(:num)', 'FaturasController::pagar/$1');
+    // As rotas de faturas e perfil agora são chamadas pelo DashboardController
+    // que centraliza a lógica de exibição das páginas do cliente.
+    $routes->get('faturas', 'DashboardController::faturas');
+    $routes->get('perfil', 'DashboardController::perfil');
+    $routes->get('faturas/visualizar/(:num)', 'DashboardController::visualizar/$1');
+
+
+    // Se você tiver um FaturasController específico para ações, ele seria chamado aqui:
+    // Ex: $routes->get('faturas/visualizar/(:num)', 'FaturasController::visualizar/$1');
 });

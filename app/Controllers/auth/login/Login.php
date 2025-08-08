@@ -15,10 +15,13 @@ class Login extends BaseController
     }
 
     // A mágica acontece aqui no método auth()
+   /**
+     * Autentica o usuário e redireciona com base na sua role.
+     */
     public function auth()
     {
         $session = session();
-        $repo = new \App\Repositories\UserRepository();
+        $repo = new \App\Repositories\UserRepository(); // Assumindo que seu repositório está correto
 
         $email = $this->request->getPost('email');
         $senha = $this->request->getPost('password');
@@ -34,20 +37,23 @@ class Login extends BaseController
             ];
             $session->set($sessionData);
 
-            // --- LÓGICA DE REDIRECIONAMENTO INTELIGENTE ---
+            // --- LÓGICA DE REDIRECIONAMENTO CORRIGIDA ---
+
+            // CORREÇÃO 1: Verificando a role diretamente da variável $usuario
             if ($usuario['role'] === 'admin') {
-                return redirect()->to(base_url('/dashboard')); // Admin vai para o painel CRM
+                return redirect()->to(base_url('dashboard'));
             } else {
-                return redirect()->to(base_url('/portal')); // Cliente vai para seu portal
+                // CORREÇÃO 2: Apontando para a nova rota correta do cliente
+                return redirect()->to(base_url('cliente/dashboard'));
             }
-            
+
         } else {
             $session->setFlashdata('msg', 'E-mail ou senha inválidos.');
             return redirect()->to(base_url('/'));
         }
     }
 
-    
+
     // O método logout() continua igual.
     public function logout()
     {
