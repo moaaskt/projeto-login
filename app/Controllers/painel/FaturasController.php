@@ -37,11 +37,15 @@ class FaturasController extends BaseController
     /**
      * Mostra o formulário para criar uma nova fatura.
      */
-    public function nova()
+     public function nova()
     {
-        $clienteModel = new ClienteModel();
+        // ALTERAÇÃO 1: Usar o UsuarioModel em vez do ClienteModel.
+        // O nome da variável continua 'clienteModel' para não impactar o resto do código.
+        $clienteModel = new \App\Models\UsuarioModel(); 
+
         $data = [
-            'clientes' => $clienteModel->findAll(),
+            // ALTERAÇÃO 2: Buscar na tabela 'usuarios' e filtrar por role 'cliente'.
+            'clientes' => $clienteModel->where('role', 'cliente')->findAll(),
             'title'    => 'Nova Fatura'
         ];
         return view('painel/faturas/form', $data);
@@ -50,13 +54,16 @@ class FaturasController extends BaseController
     /**
      * Mostra o formulário para editar uma fatura existente.
      */
-    public function editar($id)
+     public function editar($id)
     {
         $faturaModel = new FaturaModel();
-        $clienteModel = new ClienteModel();
+        // ALTERAÇÃO 1: Usar o UsuarioModel em vez do ClienteModel.
+        $clienteModel = new \App\Models\UsuarioModel(); 
+
         $data = [
             'fatura'   => $faturaModel->find($id),
-            'clientes' => $clienteModel->findAll(),
+            // ALTERAÇÃO 2: Buscar na tabela 'usuarios' e filtrar por role 'cliente'.
+            'clientes' => $clienteModel->where('role', 'cliente')->findAll(),
             'title'    => 'Editar Fatura'
         ];
         return view('painel/faturas/form', $data);

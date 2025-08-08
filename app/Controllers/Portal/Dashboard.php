@@ -17,10 +17,10 @@ class Dashboard extends BaseController
 
         // 2. Obter o ID do usuário logado a partir da sessão
         //    Estou assumindo que a chave na sessão é 'id' após o login.
-        $clienteId = $session->get('id');
+        $cliente = session()->get('cliente');
 
         // Validação: Se por algum motivo não houver ID na sessão, redireciona para o login
-        if (!$clienteId) {
+        if (!$cliente) {
             return redirect()->to('/login')->with('error', 'Sessão inválida. Por favor, faça login novamente.');
         }
 
@@ -29,7 +29,7 @@ class Dashboard extends BaseController
 
         // 4. Buscar as faturas aplicando o filtro com base no ID do cliente
         //    A função where() filtra os resultados pela coluna 'cliente_id'
-        $faturas = $faturaModel->where('cliente_id', $clienteId)
+        $faturas = $faturaModel->where('cliente_id', $cliente)
                                ->orderBy('data_vencimento', 'DESC') // Opcional: ordenar faturas da mais recente para a mais antiga
                                ->findAll();
 
@@ -41,6 +41,8 @@ class Dashboard extends BaseController
         ];
 
         // 6. Carregar a view do dashboard do cliente, passando os dados filtrados
-        return view('cliente/dashboard', $data);
+        return view('painel/cliente/index', [
+    'cliente' => $cliente
+]);
     }
 }

@@ -8,9 +8,9 @@
 
 <div class="card">
     <div class="card-body">
-        
+
         <form action="<?= base_url('dashboard/faturas/salvar') ?>" method="post">
-            
+
             <input type="hidden" name="id" value="<?= isset($fatura) ? esc($fatura['id']) : '' ?>">
 
             <div class="mb-3">
@@ -18,9 +18,11 @@
                 <select class="form-select" id="cliente_id" name="cliente_id" required>
                     <option value="">Selecione um cliente</option>
                     <?php if (!empty($clientes)): ?>
-                        <?php foreach($clientes as $cliente): ?>
+                        <?php foreach ($clientes as $cliente): ?>
                             <option value="<?= $cliente['id'] ?>" <?= (isset($fatura) && $fatura['cliente_id'] == $cliente['id']) ? 'selected' : '' ?>>
-                                <?= esc($cliente['nome_completo']) ?>
+                                <?php // ALTERAÇÃO: Trocado 'nome_completo' para 'nome' para bater com a coluna da tabela 'usuarios' 
+                                ?>
+                                <?= esc($cliente['nome']) ?>
                             </option>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -52,7 +54,7 @@
                     </select>
                 </div>
             </div>
-            
+
             <div class="mt-4">
                 <button type="submit" class="btn btn-success">Salvar Fatura</button>
                 <a href="<?= base_url('dashboard/faturas') ?>" class="btn btn-secondary">Cancelar</a>
