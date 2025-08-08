@@ -3,7 +3,7 @@
 namespace App\Controllers\Cliente;
 
 use App\Controllers\BaseController;
-
+use App\Models\FaturaModel;
 /**
  * Controla todas as páginas da área logada do cliente.
  */
@@ -119,5 +119,38 @@ class DashboardController extends BaseController
         
         // 5. Carregar a view de perfil, agora com os dados do usuário
         return view('cliente/perfil', $data);
+    }
+
+      public function pagar($id)
+    {
+        $faturaModel = new FaturaModel();
+        
+        // Obter o ID do cliente logado a partir da sessão
+        $clienteId = session()->get('usuario_id');
+
+        // Busca a fatura e verifica se ela pertence ao cliente logado
+        $fatura = $faturaModel->where('id', $id)->where('cliente_id', $clienteId)->first();
+
+        if (!$fatura) {
+            // Se a fatura não for encontrada ou não pertencer ao cliente,
+            // redireciona com uma mensagem de erro.
+            return redirect()->to('cliente/faturas')->with('error', 'Fatura inválida ou não autorizada.');
+        }
+
+        // Lógica para integrar com o gateway de pagamento (Stripe, PagSeguro, etc.)
+        //
+        // Por agora, vamos simular que o pagamento foi bem-sucedido e atualizar o status.
+        // Isso deve ser feito APÓS a confirmação do gateway em um cenário real.
+        $data = [
+            'status' => 'Paga'
+        ];
+
+        if ($faturaModel->update($id, $data)) {
+            // Redireciona de volta para a lista de faturas com uma mensagem de sucesso
+            return redirect()->to('cliente/faturas')->with('success', 'Pagamento da fatura #' . $id . ' processado com sucesso!');
+        } else {
+            // Se a atualização falhar, redireciona com uma mensagem de erro
+            return redirect()->to('cliente/faturas/visualizar/' . $id)->with('error', 'Ocorreu um erro ao atualizar o status da fatura.');
+        }
     }
 }

@@ -18,6 +18,7 @@ $routes->group('cliente', ['namespace' => 'App\Controllers\Cliente', 'filter' =>
     $routes->get('faturas', 'DashboardController::faturas');
     $routes->get('perfil', 'DashboardController::perfil');
     $routes->get('faturas/visualizar/(:num)', 'DashboardController::visualizar/$1');
+    $routes->get('faturas/pagar/(:num)', 'DashboardController::pagar/$1');
 
 
     // Se você tiver um FaturasController específico para ações, ele seria chamado aqui:
