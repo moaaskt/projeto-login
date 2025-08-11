@@ -21,7 +21,7 @@
                         <p class="mb-1 text-muted text-uppercase small">Valor Total Pago</p>
                         <h5 class="mb-0 fw-bold">R$ <?= number_format($stats['total_pago'] ?? 0, 2, ',', '.') ?></h5>
                     </div>
-                    <div class="icon-shape bg-success text-white rounded-circle p-3">
+                    <div class="icon-shape bg-success text-white rounded-circle">
                         <i class="fas fa-dollar-sign"></i>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
                         <p class="mb-1 text-muted text-uppercase small">Valor Pendente</p>
                         <h5 class="mb-0 fw-bold">R$ <?= number_format($stats['total_pendente'] ?? 0, 2, ',', '.') ?></h5>
                     </div>
-                    <div class="icon-shape bg-warning text-white rounded-circle p-3">
+                    <div class="icon-shape bg-warning text-white rounded-circle">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                         <p class="mb-1 text-muted text-uppercase small">Valor Vencido</p>
                         <h5 class="mb-0 fw-bold">R$ <?= number_format($stats['total_vencido'] ?? 0, 2, ',', '.') ?></h5>
                     </div>
-                    <div class="icon-shape bg-danger text-white rounded-circle p-3">
+                    <div class="icon-shape bg-danger text-white rounded-circle">
                         <i class="fas fa-calendar-times"></i>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                         <p class="mb-1 text-muted text-uppercase small">Total de Faturas</p>
                         <h5 class="mb-0 fw-bold"><?= esc($stats['total_faturas'] ?? 0) ?></h5>
                     </div>
-                    <div class="icon-shape bg-primary text-white rounded-circle p-3">
+                    <div class="icon-shape bg-primary text-white rounded-circle">
                         <i class="fas fa-file-invoice"></i>
                     </div>
                 </div>
