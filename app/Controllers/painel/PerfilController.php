@@ -61,7 +61,7 @@ class PerfilController extends BaseController
         if ($this->usuarioModel->save($dados)) {
             // Importante: Atualizar os dados da sessão após a alteração
             $this->regenerateUserSession($idUsuario);
-            return redirect()->to(base_url('dashboard/perfil'))->with('success', 'Dados atualizados com sucesso!');
+            return redirect()->to(base_url('cliente/perfil'))->with('success', 'Dados atualizados com sucesso!');
         } else {
             return redirect()->back()->withInput()->with('error', 'Ocorreu um erro ao atualizar os dados.');
         }
@@ -96,7 +96,7 @@ class PerfilController extends BaseController
         ];
 
         if ($this->usuarioModel->save($dados)) {
-            return redirect()->to(base_url('dashboard/perfil'))->with('success-senha', 'Senha alterada com sucesso!');
+            return redirect()->to(base_url('cliente/perfil'))->with('success-senha', 'Senha alterada com sucesso!');
         } else {
             return redirect()->back()->with('error-senha', 'Ocorreu um erro ao alterar a senha.');
         }
@@ -111,10 +111,15 @@ class PerfilController extends BaseController
         $usuario = $this->usuarioModel->find($id);
         unset($usuario['senha']);
 
+        // Preservar o estado de logged_in atual
+        $logged_in = $this->session->get('logged_in') ?? true;
+        
         $sessionData = [
             'usuario'   => $usuario,
-            'logged_in' => true,
+            'logged_in' => $logged_in,
         ];
+        
+        // Atualizar a sessão sem regenerar o ID da sessão
         $this->session->set($sessionData);
     }
 }

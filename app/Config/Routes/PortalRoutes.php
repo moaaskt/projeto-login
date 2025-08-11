@@ -22,8 +22,9 @@ $routes->group('cliente', ['namespace' => 'App\Controllers\Cliente', 'filter' =>
 
     $routes->post('faturas/processar_pagamento_ficticio', 'DashboardController::processarPagamentoFicticio');
 
-// Rota para processar a alteração de senha vinda do modal do perfil
-$routes->post('perfil/salvar-senha', 'DashboardController::salvarSenha');
+    // Rota para processar a alteração de senha vinda do modal do perfil
+    $routes->post('perfil/salvar-senha', 'DashboardController::salvarSenha');
+    $routes->post('perfil/atualizar', '\App\Controllers\painel\PerfilController::atualizarDados');
 
 
     // Se você tiver um FaturasController específico para ações, ele seria chamado aqui:

@@ -52,10 +52,6 @@ class UserRepository
     }
 
 
-    // ====================================================================
-    // == MÉTODOS ADICIONADOS PARA RESOLVER O ERRO NO LOGINCONTROLLER ==
-    // ====================================================================
-
     /**
      * Repassa a chamada do método 'update' para o UsuarioModel.
      * Isso permite que o controller use $repo->update() diretamente.
