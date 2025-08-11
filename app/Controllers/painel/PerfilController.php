@@ -36,6 +36,7 @@ class PerfilController extends BaseController
         return view('painel/perfil/index', $data);
     }
 
+
     /**
      * Atualiza os dados cadastrais (nome, email) do usuário.
      */

@@ -39,15 +39,26 @@
         </dl>
         <hr>
 
-        <?php if (strtolower($fatura['status']) !== 'paga'): ?>
-            <button type="button" class="btn btn-success btn-pagar-fatura"
-                    data-fatura-id="<?= esc($fatura['id']) ?>"
-                    data-valor="<?= esc($fatura['valor']) ?>">
-                <i class="fas fa-dollar-sign"></i> Pagar Fatura
-            </button>
-        <?php else: ?>
-            <p class="text-success"><i class="fas fa-check-circle"></i> Esta fatura já foi paga. Obrigado!</p>
-        <?php endif; ?>
+        <div class="d-flex gap-2">
+            <?php if (strtolower($fatura['status']) !== 'paga'): ?>
+                <button type="button" class="btn btn-success btn-pagar-fatura"
+                        data-fatura-id="<?= esc($fatura['id']) ?>"
+                        data-valor="<?= esc($fatura['valor']) ?>">
+                    <i class="fas fa-dollar-sign"></i> Pagar Fatura
+                </button>
+            <?php else: ?>
+                <p class="text-success"><i class="fas fa-check-circle"></i> Esta fatura já foi paga. Obrigado!</p>
+            <?php endif; ?>
+            
+            <!-- Botões para download de PDF -->
+            <a href="<?= base_url('cliente/faturas/gerar-pdf/' . $fatura['id']) ?>" class="btn btn-primary" target="_blank">
+                <i class="fas fa-file-pdf"></i> Baixar Comprovante
+            </a>
+            
+            <a href="<?= base_url('cliente/faturas/gerar-boleto/' . $fatura['id']) ?>" class="btn btn-secondary" target="_blank">
+                <i class="fas fa-barcode"></i> Baixar Boleto
+            </a>
+        </div>
     </div>
 </div>
 

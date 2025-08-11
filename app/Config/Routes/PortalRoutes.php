@@ -19,6 +19,10 @@ $routes->group('cliente', ['namespace' => 'App\Controllers\Cliente', 'filter' =>
     $routes->get('perfil', 'DashboardController::perfil');
     $routes->get('faturas/visualizar/(:num)', 'DashboardController::visualizar/$1');
     $routes->get('faturas/pagar/(:num)', 'DashboardController::pagar/$1');
+    
+    // Novas rotas para geração de PDF
+    $routes->get('faturas/gerar-pdf/(:num)', 'DashboardController::gerarPDF/$1');
+    $routes->get('faturas/gerar-boleto/(:num)', 'DashboardController::gerarBoleto/$1');
 
     $routes->post('faturas/processar_pagamento_ficticio', 'DashboardController::processarPagamentoFicticio');
 

@@ -239,4 +239,187 @@ class DashboardController extends BaseController
             return redirect()->to('cliente/faturas/visualizar/' . $id)->with('error', 'Ocorreu um erro ao atualizar o status da fatura.');
         }
     }
+
+    /**
+     * Gera um PDF da fatura para download
+     * 
+     * @param int $faturaId ID da fatura
+     * @return mixed
+     */
+    public function gerarPDF($faturaId)
+    {
+        // 1. Instanciar o Model de Faturas
+        $faturaModel = new \App\Models\FaturaModel();
+
+        // 2. Pegar o ID do cliente logado na sessão (para segurança)
+        $clienteId = session()->get('usuario')['id'];
+
+        // 3. Buscar a fatura no banco de dados com uma condição dupla:
+        //    - O ID da fatura deve ser o da URL.
+        //    - O cliente_id deve ser o do usuário logado.
+        //    Isso impede que um cliente veja a fatura de outro!
+        $fatura = $faturaModel->where('id', $faturaId)
+            ->where('cliente_id', $clienteId)
+            ->first();
+
+        // 4. Se a fatura não for encontrada (ou não pertencer ao cliente), mostra erro 404.
+        if (!$fatura) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Fatura não encontrada ou não pertence a você.');
+        }
+
+        // 5. Preparar o HTML para o PDF
+        $html = '<html><head>';
+        $html .= '<style>
+            body { font-family: Arial, sans-serif; margin: 30px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .fatura-info { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; }
+            .fatura-titulo { font-size: 24px; margin-bottom: 20px; }
+            .fatura-detalhe { margin-bottom: 10px; }
+            .fatura-valor { font-size: 18px; font-weight: bold; }
+            .fatura-status { display: inline-block; padding: 5px 10px; border-radius: 3px; }
+            .status-pendente { background-color: #ffc107; color: #000; }
+            .status-paga { background-color: #28a745; color: #fff; }
+            .status-vencida { background-color: #dc3545; color: #fff; }
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; }
+        </style>';
+        $html .= '</head><body>';
+        
+        // Cabeçalho
+        $html .= '<div class="header"><h1>Fatura #' . $fatura['id'] . '</h1></div>';
+        
+        // Informações da fatura
+        $html .= '<div class="fatura-info">';
+        $html .= '<div class="fatura-titulo">' . $fatura['descricao'] . '</div>';
+        
+        // Status com classe CSS apropriada
+        $statusClass = 'status-pendente';
+        if (strtolower($fatura['status']) === 'paga') {
+            $statusClass = 'status-paga';
+        } elseif (strtolower($fatura['status']) === 'vencida') {
+            $statusClass = 'status-vencida';
+        }
+        
+        $html .= '<div class="fatura-detalhe">Status: <span class="fatura-status ' . $statusClass . '">' . ucfirst($fatura['status']) . '</span></div>';
+        $html .= '<div class="fatura-detalhe fatura-valor">Valor: R$ ' . number_format($fatura['valor'], 2, ',', '.') . '</div>';
+        $html .= '<div class="fatura-detalhe">Data de Emissão: ' . date('d/m/Y', strtotime($fatura['created_at'])) . '</div>';
+        $html .= '<div class="fatura-detalhe">Data de Vencimento: ' . date('d/m/Y', strtotime($fatura['data_vencimento'])) . '</div>';
+        $html .= '</div>';
+        
+        // Rodapé
+        $html .= '<div class="footer">Este documento é uma representação digital da sua fatura. Gerado em ' . date('d/m/Y H:i:s') . '</div>';
+        
+        $html .= '</body></html>';
+
+        // 6. Configurar e gerar o PDF
+        $options = new \Dompdf\Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // 7. Fazer o download do PDF
+        return $dompdf->stream("fatura_{$fatura['id']}.pdf", ["Attachment" => true]);
+    }
+
+    /**
+     * Gera um PDF do boleto para download
+     * 
+     * @param int $faturaId ID da fatura
+     * @return mixed
+     */
+    public function gerarBoleto($faturaId)
+    {
+        // 1. Instanciar o Model de Faturas
+        $faturaModel = new \App\Models\FaturaModel();
+
+        // 2. Pegar o ID do cliente logado na sessão (para segurança)
+        $clienteId = session()->get('usuario')['id'];
+
+        // 3. Buscar a fatura no banco de dados com uma condição dupla
+        $fatura = $faturaModel->where('id', $faturaId)
+            ->where('cliente_id', $clienteId)
+            ->first();
+
+        // 4. Se a fatura não for encontrada (ou não pertencer ao cliente), mostra erro 404.
+        if (!$fatura) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Fatura não encontrada ou não pertence a você.');
+        }
+
+        // 5. Preparar o HTML para o PDF do boleto
+        $html = '<html><head>';
+        $html .= '<style>
+            body { font-family: Arial, sans-serif; margin: 30px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .boleto-container { border: 1px solid #000; padding: 20px; margin-bottom: 30px; }
+            .boleto-header { border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+            .boleto-info { margin-bottom: 20px; }
+            .boleto-info-row { display: flex; margin-bottom: 10px; }
+            .boleto-info-label { width: 200px; font-weight: bold; }
+            .boleto-info-value { flex: 1; }
+            .boleto-barcode { text-align: center; margin: 30px 0; }
+            .boleto-barcode img { max-width: 100%; height: 80px; }
+            .boleto-valor { font-size: 18px; font-weight: bold; }
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; }
+            .instrucoes { margin-top: 20px; border-top: 1px dashed #000; padding-top: 20px; }
+            .instrucoes h3 { margin-bottom: 10px; }
+            .instrucoes ul { padding-left: 20px; }
+        </style>';
+        $html .= '</head><body>';
+        
+        // Cabeçalho
+        $html .= '<div class="header"><h1>Boleto de Pagamento</h1></div>';
+        
+        // Container do boleto
+        $html .= '<div class="boleto-container">';
+        $html .= '<div class="boleto-header"><h2>Dados do Boleto</h2></div>';
+        
+        // Informações do boleto
+        $html .= '<div class="boleto-info">';
+        $html .= '<div class="boleto-info-row"><div class="boleto-info-label">Beneficiário:</div><div class="boleto-info-value">Sistema de Faturas</div></div>';
+        $html .= '<div class="boleto-info-row"><div class="boleto-info-label">CNPJ:</div><div class="boleto-info-value">00.000.000/0001-00</div></div>';
+        $html .= '<div class="boleto-info-row"><div class="boleto-info-label">Descrição:</div><div class="boleto-info-value">' . $fatura['descricao'] . '</div></div>';
+        $html .= '<div class="boleto-info-row"><div class="boleto-info-label">Número da Fatura:</div><div class="boleto-info-value">' . $fatura['id'] . '</div></div>';
+        $html .= '<div class="boleto-info-row"><div class="boleto-info-label">Data de Emissão:</div><div class="boleto-info-value">' . date('d/m/Y', strtotime($fatura['created_at'])) . '</div></div>';
+        $html .= '<div class="boleto-info-row"><div class="boleto-info-label">Data de Vencimento:</div><div class="boleto-info-value">' . date('d/m/Y', strtotime($fatura['data_vencimento'])) . '</div></div>';
+        $html .= '<div class="boleto-info-row"><div class="boleto-info-label">Valor:</div><div class="boleto-info-value boleto-valor">R$ ' . number_format($fatura['valor'], 2, ',', '.') . '</div></div>';
+        $html .= '</div>';
+        
+        // Código de barras (simulado)
+        $html .= '<div class="boleto-barcode">';
+        $html .= '<img src="https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Marca_Pix/Marca_Pix_2.jpg" alt="Código de Barras">';
+        $html .= '</div>';
+        
+        // Instruções
+        $html .= '<div class="instrucoes">';
+        $html .= '<h3>Instruções</h3>';
+        $html .= '<ul>';
+        $html .= '<li>Este é um boleto simulado para fins de demonstração.</li>';
+        $html .= '<li>Em um ambiente real, este boleto teria um código de barras válido para pagamento.</li>';
+        $html .= '<li>Não efetue pagamento com este boleto.</li>';
+        $html .= '</ul>';
+        $html .= '</div>';
+        
+        $html .= '</div>'; // Fim do container do boleto
+        
+        // Rodapé
+        $html .= '<div class="footer">Este documento é uma representação digital do seu boleto. Gerado em ' . date('d/m/Y H:i:s') . '</div>';
+        
+        $html .= '</body></html>';
+
+        // 6. Configurar e gerar o PDF
+        $options = new \Dompdf\Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // 7. Fazer o download do PDF
+        return $dompdf->stream("boleto_fatura_{$fatura['id']}.pdf", ["Attachment" => true]);
+    }
 }
